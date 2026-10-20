@@ -75,3 +75,10 @@ Para probar "Ver cómo va mi solicitud" y "Anular" sin enviar una solicitud, use
 | `docs/propuesta-demo.html` | Diseño de la demo: pantallas, estados, niveles de cambio (A, B, C) y cobertura de los hallazgos |
 | `docs/evidencia/` | Capturas del sitio actual, solo con datos de prueba y sin enviar nada |
 | `docs/demo/` | Capturas de la demo usadas en la comparación |
+
+## Licencia y avisos
+
+- El código, los textos y el diseño de este proyecto se publican con licencia [MIT](LICENSE): se pueden usar, copiar y modificar libremente, manteniendo el aviso de autoría.
+- El catálogo de establecimientos, prestadores y motivos es información pública de Telesalud, obtenida solo con consultas de lectura a la API que usa su formulario.
+- Las capturas de telesalud.gob.cl en `docs/evidencia/` se citan con fines de análisis y crítica, con su fuente. No forman parte de la licencia MIT.
+- Telesalud, el Ministerio de Salud y sus nombres y marcas pertenecen a sus titulares. Este proyecto es independiente y no está asociado ni respaldado por ellos.

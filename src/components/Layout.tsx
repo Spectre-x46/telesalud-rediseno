@@ -38,7 +38,7 @@ export function Header({ back, backLabel = 'Volver' }: HeaderProps) {
         ) : (
           <a className="brand" href="#/">
             <svg aria-hidden="true"><use href="#logo" /></svg>
-            Telesalud
+            Telesalud <span className="brand-tag">propuesta</span>
           </a>
         )}
         <a className="toplink" href="#/ayuda">
@@ -66,7 +66,7 @@ export function Page({ title, heading, back, backLabel, className, children, bef
   const h1 = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
-    document.title = `${title} · Telesalud (prototipo)`;
+    document.title = `${title} · Propuesta de rediseño de Telesalud`;
     window.scrollTo(0, 0);
     // Mover el foco al título en cada pantalla nueva (no en la carga inicial).
     if (document.body.dataset.loaded) h1.current?.focus({ preventScroll: true });

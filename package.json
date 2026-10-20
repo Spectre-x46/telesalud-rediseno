@@ -1,6 +1,8 @@
 {
   "name": "telesalud-rediseno",
   "private": true,
+  "license": "MIT",
+  "author": "Felipe Droguett O. (https://felipe-droguett.netlify.app/)",
   "version": "0.1.0",
   "type": "module",
   "description": "Prototipo no oficial de rediseño de la experiencia de Telesalud (datos ficticios)",
