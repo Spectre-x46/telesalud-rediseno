@@ -1,0 +1,40 @@
+# ── Datos personales ─────────────────────────────────────────────
+# Capturas originales del recorrido real en telesalud.gob.cl.
+# Contienen teléfonos, correo, dirección y código de seguimiento reales.
+# Nunca subir. La evidencia sin datos personales está en docs/evidencia/.
+/Imagen*.png
+/Imagenfinal.png
+/originales/
+
+# ── Secretos y entorno ──────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.vercel/
+
+# ── Dependencias y compilación ──────────────────────────────────
+node_modules/
+dist/
+build/
+.vite/
+.cache/
+coverage/
+*.tsbuildinfo
+
+# ── Herramientas locales ────────────────────────────────────────
+.claude/
+.playwright-mcp/
+*.zip
+
+# ── Sistema operativo y editores ────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# ── Registros ───────────────────────────────────────────────────
+*.log
+npm-debug.log*

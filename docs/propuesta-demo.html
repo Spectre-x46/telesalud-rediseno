@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Propuesta de rediseño Telesalud</title>
+<style>
+:root{
+  --bg:#fbfaf7;--surface:#fff;--text:#1d1f23;--muted:#5d6470;--line:#e3e1db;--code:#f1efe9;
+  --accent:#0f6e6a;--accent-soft:#e3f1ef;--warn:#8a5200;--warn-soft:#fdf1dc;--crit:#a3312a;--crit-soft:#fbe7e5;
+  --ok:#2f6b2f;--ok-soft:#e6f2e3;--phone:#f4f6f7;--phone-line:#cfd6da;
+  --la:#2f6b2f;--lb:#8a5200;--lc:#5b4a9e;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15171a;--surface:#1d2024;--text:#e7e8ea;--muted:#a0a6b0;--line:#30343a;--code:#262a2f;
+    --accent:#5cc2bb;--accent-soft:#17312f;--warn:#e7b25a;--warn-soft:#322715;--crit:#f08a82;--crit-soft:#3a1f1d;
+    --ok:#8fcf87;--ok-soft:#1c2e1b;--phone:#22262b;--phone-line:#3a4046;
+    --la:#8fcf87;--lb:#e7b25a;--lc:#b3a3ec;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15171a;--surface:#1d2024;--text:#e7e8ea;--muted:#a0a6b0;--line:#30343a;--code:#262a2f;
+  --accent:#5cc2bb;--accent-soft:#17312f;--warn:#e7b25a;--warn-soft:#322715;--crit:#f08a82;--crit-soft:#3a1f1d;
+  --ok:#8fcf87;--ok-soft:#1c2e1b;--phone:#22262b;--phone-line:#3a4046;
+  --la:#8fcf87;--lb:#e7b25a;--lc:#b3a3ec;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,sans-serif}
+main{max-width:1040px;margin:0 auto;padding:32px 16px 80px}
+h1{font-size:1.9rem;line-height:1.2;margin:0 0 6px}
+h2{font-size:1.35rem;margin:48px 0 10px;padding-top:14px;border-top:1px solid var(--line)}
+h3{font-size:1.08rem;margin:0 0 6px}
+h4{font-size:.98rem;margin:14px 0 4px}
+p{margin:0 0 12px} ul,ol{margin:0 0 14px;padding-left:22px} li{margin:4px 0}
+a{color:var(--accent)} code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.88em}
+.byline{color:var(--muted);font-size:.9rem}
+.lead{font-size:1.05rem}
+.muted{color:var(--muted)} .small{font-size:.86rem}
+nav.toc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:20px 0}
+nav.toc ol{margin:0;columns:2;column-gap:28px}
+@media (max-width:640px){nav.toc ol{columns:1}}
+.callout{border-radius:10px;padding:14px 16px;margin:16px 0;background:var(--surface);border:1px solid var(--line)}
+.callout.key{background:var(--accent-soft);border-color:transparent}
+.callout.warn{background:var(--warn-soft);border-color:transparent}
+.callout > strong:first-child{display:block;margin-bottom:4px}
+.tablewrap{overflow-x:auto;margin:12px 0 18px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{background:var(--code);font-weight:600} tr:last-child td{border-bottom:0}
+.L{display:inline-block;font-size:.72rem;font-weight:700;border-radius:6px;padding:1px 7px;border:1.5px solid currentColor;white-space:nowrap;vertical-align:1px}
+.LA{color:var(--la)} .LB{color:var(--lb)} .LC{color:var(--lc)}
+.layers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+@media (max-width:760px){.layers{grid-template-columns:1fr}}
+.layer{background:var(--surface);border:1px solid var(--line);border-top:4px solid;border-radius:10px;padding:12px 14px}
+.layer.a{border-top-color:var(--la)}.layer.b{border-top-color:var(--lb)}.layer.c{border-top-color:var(--lc)}
+.flowmap{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+.flowmap span{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:.88rem}
+.flowmap span.main{border-color:var(--accent);background:var(--accent-soft);font-weight:600}
+.flowmap i{color:var(--muted);font-style:normal}
+.screen{display:grid;grid-template-columns:250px 1fr;gap:22px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;margin:16px 0}
+@media (max-width:760px){.screen{grid-template-columns:1fr}}
+.sid{font-family:ui-monospace,monospace;font-size:.8rem;color:var(--muted)}
+.fixes{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 10px}
+.fixes span{font-family:ui-monospace,monospace;font-size:.74rem;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:0 7px}
+.states{font-size:.86rem}
+.phone{width:230px;margin:0 auto;border:2px solid var(--phone-line);border-radius:26px;padding:10px 8px 14px;background:var(--phone)}
+.phone .scr{background:var(--surface);border-radius:16px;overflow:hidden;font-size:11px;line-height:1.35;min-height:380px;display:flex;flex-direction:column}
+.m-demo{background:#6b4a00;color:#fff;font-size:8.5px;text-align:center;padding:2px}
+.m-top{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:#1f3b44;color:#fff;font-weight:600;font-size:10.5px}
+.m-sos{display:flex;justify-content:space-between;background:#fbe7e5;color:#7a1f19;padding:5px 8px;font-size:10px;font-weight:600}
+.m-body{padding:9px;display:flex;flex-direction:column;gap:6px;flex:1}
+.m-h{font-size:13px;font-weight:700;color:var(--text)}
+.m-p{color:var(--muted)}
+.m-btn{border:1.5px solid #0f6e6a;border-radius:8px;padding:7px 8px;font-weight:600;color:#0f6e6a;background:transparent}
+.m-btn.pri{background:#0f6e6a;color:#fff}
+.m-card{border:1px solid var(--line);border-radius:8px;padding:7px;background:var(--bg)}
+.m-field{border:1px solid var(--phone-line);border-radius:6px;padding:6px;color:var(--muted);background:var(--surface)}
+.m-step{display:flex;gap:3px}.m-step i{flex:1;height:4px;border-radius:2px;background:var(--phone-line)}.m-step i.on{background:#0f6e6a}
+.m-chip{display:inline-block;border:1px solid var(--phone-line);border-radius:999px;padding:3px 7px;margin:2px 2px 0 0}
+.m-time{border-left:2px solid #0f6e6a;padding-left:7px;margin-left:3px}
+.m-time div{margin-bottom:5px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:720px){.grid2{grid-template-columns:1fr}}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.box.ok{background:var(--ok-soft);border-color:transparent}.box.no{background:var(--crit-soft);border-color:transparent}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:10px 0 16px;background:var(--surface)}
+.cmp > div{padding:12px 14px}
+.cmp > div:first-child{border-right:1px solid var(--line);background:var(--code)}
+.cmp h4{margin:0 0 6px}
+@media (max-width:720px){.cmp{grid-template-columns:1fr}.cmp > div:first-child{border-right:0;border-bottom:1px solid var(--line)}}
+pre{background:var(--code);border-radius:8px;padding:12px;overflow-x:auto;font-size:.8rem;line-height:1.45}
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:12px 0}
+details summary{cursor:pointer;font-weight:600}
+.themebtn{float:right;font:inherit;font-size:.8rem;padding:4px 10px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
+@media print{.themebtn{display:none}.screen{break-inside:avoid}details{display:block}}
+</style>
+</head>
+<body>
+<main>
+<button class="themebtn" id="themebtn" type="button">Cambiar tema</button>
+<h1>Propuesta de rediseño Telesalud</h1>
+<div class="byline">Diseño de la demo funcional · versión 3 · 20-10-2026 · <a href="https://felipe-droguett.netlify.app/">Felipe Droguett O.</a></div>
+
+<div class="callout key">
+<strong>La idea en una frase</strong>
+No es un sistema de salud nuevo. Es la misma función que Telesalud ya cumple, pero mucho más sencilla para el paciente. Recibe los mismos datos y entrega al CESFAM la misma solicitud; lo único que cambia es cómo la persona encuentra lo que necesita y completa el formulario.
+</div>
+
+<nav class="toc" aria-label="Contenido">
+<ol>
+  <li><a href="#capas">Tres niveles de cambio</a></li>
+  <li><a href="#contrato">Lo que llega al CESFAM no cambia</a></li>
+  <li><a href="#principios">Reglas de diseño</a></li>
+  <li><a href="#mapa">Mapa del recorrido</a></li>
+  <li><a href="#pantallas">Pantallas y estados</a></li>
+  <li><a href="#presentacion">Modo presentación</a></li>
+  <li><a href="#medir">Qué mediremos (sin cifras todavía)</a></li>
+  <li><a href="#cobertura">Cobertura de los 35 hallazgos</a></li>
+  <li><a href="#tecnico">Anexo técnico: FHIR</a></li>
+  <li><a href="#fases">Fases y decisiones</a></li>
+</ol>
+</nav>
+
+<!-- ================================================= -->
+<section id="capas">
+<h2>Tres niveles de cambio</h2>
+<p>Cada mejora de la demo lleva una marca que dice qué necesitaría para existir de verdad. El rediseño se sostiene solo con el nivel A; los niveles B y C son mejoras adicionales y no requisitos.</p>
+<div class="layers">
+  <div class="layer a"><span class="L LA">A · Solo experiencia</span>
+    <p class="small" style="margin-top:8px">Se puede hacer cambiando solo lo que ve el paciente: textos, orden, diseño, accesibilidad, validaciones y ayuda. Los datos enviados, la taxonomía, el código, los estados y el triage siguen iguales.</p></div>
+  <div class="layer b"><span class="L LB">B · Requiere un cambio de MINSAL</span>
+    <p class="small" style="margin-top:8px">Necesita que MINSAL cambie algo detrás: exponer un dato nuevo (por ejemplo, el resultado de una solicitud), agregar un campo, publicar páginas por CESFAM o acordar un criterio institucional.</p></div>
+  <div class="layer c"><span class="L LC">C · Oportunidad por explorar</span>
+    <p class="small" style="margin-top:8px">Depende de integraciones cuyo alcance no conocemos, como qué entrega hoy ClaveÚnica a Telesalud o si podría consultarse la inscripción en Fonasa. Se muestra como posibilidad, simulada, sin darla por disponible.</p></div>
+</div>
+</section>
+
+<!-- ================================================= -->
+<section id="contrato">
+<h2>Lo que llega al CESFAM no cambia</h2>
+<p>La demo reúne los mismos datos que pide hoy el formulario, con los mismos catálogos (tipo de documento, región, comuna, establecimiento, prestador, motivo, especificidad) y el mismo largo máximo por campo. Cambia el orden, la forma de preguntar y la ayuda, pero no el contenido de la solicitud.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Dato del formulario actual</th><th>Cómo lo pide la demo</th><th>Nivel</th></tr></thead>
+<tbody>
+<tr><td>Tipo y N° de documento, nombres, apellidos</td><td>Igual, con formato automático de RUN, teclado y autocompletado correctos</td><td><span class="L LA">A</span></td></tr>
+<tr><td>Nombre social, género (opcionales)</td><td>Igual, en una sección plegada "Otros datos (opcionales)"</td><td><span class="L LA">A</span></td></tr>
+<tr><td>Sexo, fecha de nacimiento</td><td>Fecha en tres casillas (día, mes, año) que se envía en el mismo formato de hoy</td><td><span class="L LA">A</span></td></tr>
+<tr><td>Discapacidad, cuidador/a</td><td>Iguales, con una explicación breve y neutra</td><td><span class="L LA">A</span></td></tr>
+<tr><td>Calle, número, block, región y comuna de la dirección</td><td>Igual; la comuna es un buscador</td><td><span class="L LA">A</span></td></tr>
+<tr><td>Región, comuna y establecimiento</td><td>La región y la comuna de la dirección se usan como filtro inicial; la persona confirma o cambia. Se envían los mismos campos.</td><td><span class="L LA">A</span></td></tr>
+<tr><td>Teléfono 1 y 2 con tipo celular/fijo, email, aviso por email</td><td>Iguales, con controles más grandes</td><td><span class="L LA">A</span></td></tr>
+<tr><td>Tipo de prestador, motivo, especificidad</td><td>Los mismos valores del catálogo, elegidos con una lista guiada por necesidad o con el catálogo completo. Si solo hay una especificidad, se selecciona sola y se muestra.</td><td><span class="L LA">A</span></td></tr>
+<tr><td>Información adicional (obligatoria, ≤ 300)</td><td>Igual, con guía y ejemplo</td><td><span class="L LA">A</span></td></tr>
+<tr><td>Código de seguimiento (10 caracteres)</td><td>El mismo código, mostrado más grande, con botones para copiar y compartir</td><td><span class="L LA">A</span></td></tr>
+<tr><td>Estados: Ingresada, En revisión, Finalizada</td><td>Los mismos tres estados, cada uno con una explicación de qué significa</td><td><span class="L LA">A</span></td></tr>
+</tbody></table></div>
+<div class="callout"><strong>Fuera del contrato actual (se muestran aparte y marcados)</strong>
+<ul>
+  <li>El resultado de una solicitud finalizada (hora, resolución a distancia, anulación) <span class="L LB">B</span></li>
+  <li>El número desde el que llama cada CESFAM <span class="L LB">B</span></li>
+  <li>Una opción "no sé qué categoría; que el equipo decida" <span class="L LB">B</span></li>
+  <li>Campos propios para quien pide por otra persona <span class="L LB">B</span></li>
+  <li>Datos y CESFAM precargados con ClaveÚnica o Fonasa <span class="L LC">C</span></li>
+  <li>"Mis solicitudes" sin código <span class="L LC">C</span></li>
+</ul></div>
+</section>
+
+<!-- ================================================= -->
+<section id="principios">
+<h2>Reglas de diseño</h2>
+<ol>
+  <li><strong>Conservar lo que existe.</strong> Misma taxonomía, mismos datos, mismo código, mismos estados y mismo triage humano. Se presenta mejor lo existente antes que inventar algo nuevo.</li>
+  <li><strong>Celular primero</strong>, una decisión por pantalla y una barra de avance.</li>
+  <li><strong>Lenguaje de persona:</strong> siempre "usted". Los nombres del catálogo se muestran tal cual cuando hay que elegir, acompañados de una explicación simple.</li>
+  <li><strong>Accesibilidad WCAG 2.1 AA:</strong> zoom permitido, texto grande, controles de 48 px, contraste suficiente, encabezados y errores con texto.</li>
+  <li><strong>No forzar una categoría.</strong> Si la persona no sabe o no calza en ninguna, la demo lo muestra con honestidad en vez de elegir por ella.</li>
+  <li><strong>Emergencia fija.</strong> El 131 y Salud Responde aparecen en todas las pantallas, igual para todos. No dependen de lo que se escriba.</li>
+  <li><strong>No prometer lo que no sabemos:</strong> ni plazos, ni números de llamada, ni datos precargados, ni cifras de mejora.</li>
+  <li><strong>La técnica no se ve.</strong> FHIR es invisible para el paciente; solo aparecen en el modo presentación.</li>
+  <li><strong>Franja "Prototipo no oficial · datos ficticios"</strong> en cada pantalla, y sin logos del gobierno.</li>
+</ol>
+</section>
+
+<!-- ================================================= -->
+<section id="mapa">
+<h2>Mapa del recorrido</h2>
+<div class="flowmap">
+  <span class="main">S1 Inicio</span><i>→</i><span>S2 ¿Con qué necesita ayuda?</span><i>→</i>
+  <i>→</i><span>S3 Datos del paciente</span><i>→</i><span>S4 Dirección y CESFAM</span><i>→</i>
+  <span>S5 Contacto</span><i>→</i><span>S6 Revisar y enviar</span><i>→</i><span class="main">S7 Solicitud enviada</span><i>→</i><span>S8 Consultar estado</span>
+</div>
+<p class="small muted">Laterales: S9 Anular, S10 Ayuda, S11 Errores y S2b "No sé qué elegir" (caso no resuelto). Además, dos demostraciones de oportunidad marcadas como tales: S0 Página por CESFAM <span class="L LB">B</span> y S12 Ingreso con identidad precargada <span class="L LC">C</span>.</p>
+</section>
+
+<!-- ================================================= -->
+<section id="pantallas">
+<h2>Pantallas y estados</h2>
+<p class="small muted">Los bocetos son esquemáticos, para acordar contenido y orden. El diseño visual se define al programar.</p>
+
+<div class="screen">
+  <div class="phone"><div class="scr"><div class="m-demo">PROTOTIPO NO OFICIAL · DATOS FICTICIOS</div><div class="m-top"><span>Telesalud</span><span>Ayuda</span></div><div class="m-sos"><span>¿Emergencia? 131</span><span>Salud Responde</span></div>
+    <div class="m-body"><div class="m-h">¿Qué necesita hacer?</div>
+    <div class="m-btn pri">Enviar una solicitud a mi CESFAM</div><div class="m-btn">Ver cómo va mi solicitud</div><div class="m-btn">Cómo funciona</div><div class="m-btn">Anular una solicitud</div>
+    <div class="m-p">¿Tiene ClaveÚnica? <u>Ingresar</u></div></div></div></div>
+  <div><span class="sid">S1</span> <span class="L LA">A</span><h3>Inicio</h3>
+    <div class="fixes"><span>U03</span><span>U04</span><span>U06</span><span>U07</span><span>U08</span></div>
+    <p>Son las mismas cuatro acciones que existen hoy (pedir, consultar, tutorial, iniciar sesión), con nombres de persona y visibles sin scroll. La franja de emergencia queda arriba, legible y con enlaces que llaman al tocarlos.</p>
+    <p class="small">El acceso se ofrece sin prometer que ahorra trabajo, porque no sabemos qué se rellena al iniciar sesión; la versión con datos precargados es S12 <span class="L LC">C</span>.</p>
+    <p class="states"><b>Estados:</b> normal · con borrador guardado ("Tiene una solicitud sin terminar [Continuar]").</p></div>
+</div>
+
+<div class="screen">
+  <div class="phone"><div class="scr"><div class="m-demo">PROTOTIPO NO OFICIAL · DATOS FICTICIOS</div><div class="m-top"><span>← Volver</span><span>Paso 1 de 5</span></div>
+    <div class="m-body"><div class="m-step"><i class="on"></i><i></i><i></i><i></i><i></i></div><div class="m-h">¿Con qué necesita ayuda?</div><div class="m-field">🔍 Buscar: receta, examen, muela…</div>
+    <div class="m-card">Que me evalúen por una molestia</div><div class="m-card">Remedios y recetas</div><div class="m-card">Exámenes y resultados</div><div class="m-card">Controles de salud</div><div class="m-card">Embarazo y salud sexual</div><div class="m-card">Dientes</div><div class="m-card">Ver todas las categorías</div><div class="m-card"><b>No estoy seguro/a</b></div></div></div></div>
+  <div><span class="sid">S2</span> <span class="L LA">A</span><h3>¿Con qué necesita ayuda? (lista guiada)</h3>
+    <div class="fixes"><span>U17</span><span>U18</span><span>U19</span></div>
+    <p>Los grupos por necesidad son solo una forma de navegar: cada uno lleva a las mismas combinaciones reales de prestador y motivo, con su nombre oficial y una línea que explica qué es. "Ver todas las categorías" muestra el catálogo completo por prestador, como hoy, para quien ya sabe qué buscar.</p>
+    <ul>
+      <li><strong>Una misma necesidad en varios prestadores</strong> (por ejemplo "Control crónico" en Medicina, Enfermería, Nutrición y Kinesiología): se muestran todas las opciones con el profesional. No se elige por la persona.</li>
+      <li><strong>Especificidad:</strong> si solo hay una, queda seleccionada y visible. El rango de edad de Dental se preselecciona según la fecha de nacimiento, y la persona puede cambiarlo.</li>
+      <li><strong>Texto adicional:</strong> se pide con una guía ("Cuente con sus palabras qué necesita. Por ejemplo: desde cuándo, y si es por una receta, un examen o un malestar").</li>
+      <li><strong>"No estoy seguro/a"</strong> no asigna ninguna categoría: lleva a S2b.</li>
+    </ul>
+    <p class="states"><b>Estados:</b> grupos · opciones de un grupo · búsqueda · búsqueda sin resultados · catálogo completo · texto guiado.</p></div>
+</div>
+
+<div class="screen">
+  <div class="phone"><div class="scr"><div class="m-demo">PROTOTIPO NO OFICIAL · DATOS FICTICIOS</div><div class="m-top"><span>← Volver</span><span>Paso 1 de 5</span></div>
+    <div class="m-body"><div class="m-h">No está seguro/a de qué elegir</div><div class="m-p">Es normal. Hoy el formulario pide una categoría para enviar.</div>
+    <div class="m-card"><b>Opción 1:</b> Vea todas las categorías con una explicación de cada una.</div><div class="m-card"><b>Opción 2:</b> Consulte directamente en su CESFAM.</div></div></div></div>
+  <div><span class="sid">S2b</span> <span class="L LA">A</span> + <span class="L LB">B</span><h3>"No sé qué elegir" (caso no resuelto)</h3>
+    <div class="fixes"><span>U17</span><span>U31</span><span>U32</span></div>
+    <p>Representa con honestidad a quien no sabe qué necesita. Con el sistema actual, la solicitud necesita una categoría, así que la demo ofrece caminos para decidir sin decidir por la persona:</p>
+    <ul>
+      <li>ver todas las categorías explicadas;</li>
+      <li>consultar en su CESFAM.</li>
+    </ul>
+    <p><strong>Opción marcada como mejora adicional <span class="L LB">B</span>:</strong> "Enviar sin categoría; el equipo del CESFAM la elegirá". Se muestra claramente como una propuesta que requiere que MINSAL acepte solicitudes sin clasificar. En la demo, esa opción explica esto en vez de enviar.</p>
+    <p class="small muted">"Medicina General › Otros" sigue existiendo como una opción más del catálogo, con su explicación. Nunca se asigna sola.</p></div>
+</div>
+
+<div class="screen">
+  <div class="phone"><div class="scr"><div class="m-demo">PROTOTIPO NO OFICIAL · DATOS FICTICIOS</div><div class="m-top"><span>← Volver</span><span>Paso 2 de 5</span></div>
+    <div class="m-body"><div class="m-step"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div><div class="m-h">Datos de la persona que se atenderá</div>
+    <div class="m-p">Si hace la solicitud por otra persona, escriba aquí los datos de ella.</div><div class="m-field">RUN: 12.345.678-5</div><div class="m-field">Nombres</div><div class="m-field">Fecha de nacimiento: [día] [mes] [año]</div><div class="m-p">▸ Otros datos (opcionales)</div></div></div></div>
+  <div><span class="sid">S3</span> <span class="L LA">A</span><h3>Datos del paciente</h3>
+    <div class="fixes"><span>U09</span><span>U10</span><span>U11</span><span>U20</span><span>U35</span></div>
+    <p>Son los mismos campos de hoy, con teclado y autocompletado correctos, errores explicados en texto y la fecha en tres casillas.</p>
+    <ul>
+      <li><strong>Pedir por otra persona</strong> <span class="L LA">A</span>: se explica que los datos son del paciente y que el teléfono de contacto puede ser el de quien ayuda.</li>
+      <li><strong>Campos propios para quien ayuda</strong> <span class="L LB">B</span>: se mencionan en el modo presentación como mejora adicional, no en el formulario.</li>
+      <li><strong>Casilla de discapacidad:</strong> lleva un texto neutro, "Esta información la verá el equipo que revisa su solicitud". No promete prioridad.</li>
+    </ul>
+    <p class="states"><b>Estados:</b> vacío · con errores (RUN inválido, fecha imposible, campo obligatorio) · otros datos desplegados.</p></div>
+</div>
+
+<div class="screen">
+  <div class="phone"><div class="scr"><div class="m-demo">PROTOTIPO NO OFICIAL · DATOS FICTICIOS</div><div class="m-top"><span>← Volver</span><span>Paso 3 de 5</span></div>
+    <div class="m-body"><div class="m-step"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div><div class="m-h">¿Dónde vive y dónde se atiende?</div>
+    <div class="m-field">Comuna: San Bern… ▸ San Bernardo</div><div class="m-p">Centros de San Bernardo:</div><div class="m-card">CESFAM Confraternidad<br><span class="m-p">Martín de Solís 14210</span></div><div class="m-card">CESFAM Raúl Cuevas (Ex-San Bernardo)</div><div class="m-p"><u>No sé en qué centro estoy inscrito/a</u></div></div></div></div>
+  <div><span class="sid">S4</span> <span class="L LA">A</span><h3>Dirección y establecimiento</h3>
+    <div class="fixes"><span>U12</span><span>U13</span><span>U14</span><span>U31</span></div>
+    <ul>
+      <li><strong>Comuna:</strong> se escribe en un buscador.</li>
+      <li><strong>Establecimientos:</strong> se muestran los de esa comuna con su dirección, que la API pública ya entrega. La persona puede cambiar de comuna si se atiende en otra.</li>
+      <li><strong>"No sé en qué centro estoy inscrito/a":</strong> explica cómo averiguarlo y qué hacer si no está inscrito/a.</li>
+      <li><strong>CESFAM precargado:</strong> solo en S12 <span class="L LC">C</span>.</li>
+    </ul>
+    <p class="states"><b>Estados:</b> buscar comuna · elegir centro · no sé mi centro · no inscrito/a.</p></div>
+</div>
+
+<div class="screen">
+  <div class="phone"><div class="scr"><div class="m-demo">PROTOTIPO NO OFICIAL · DATOS FICTICIOS</div><div class="m-top"><span>← Volver</span><span>Paso 4 de 5</span></div>
+    <div class="m-body"><div class="m-step"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div><div class="m-h">¿Cómo le contactamos?</div>
+    <div class="m-field">Teléfono principal: +56 9 ____ ____</div><div class="m-p">▸ Agregar otro teléfono</div><div class="m-field">Correo (opcional)</div>
+    <div class="m-card">El equipo de su CESFAM le contactará. Esté atento/a a llamadas, incluso de números que no conozca.</div></div></div></div>
+  <div><span class="sid">S5</span> <span class="L LA">A</span><h3>Contacto</h3>
+    <div class="fixes"><span>U09</span><span>U15</span><span>U16</span></div>
+    <p>Son los mismos campos, cada uno a todo el ancho, con teclado numérico o de correo y controles grandes. El aviso de la llamada es general y verdadero.</p>
+    <p class="small">No se promete desde qué número llamarán ni cuántos intentos harán, porque eso varía por CESFAM. Mostrarlo sería una mejora <span class="L LB">B</span>.</p>
+    <p class="states"><b>Estados:</b> vacío · teléfono inválido · segundo teléfono desplegado.</p></div>
+</div>
+
+<div class="screen">
+  <div class="phone"><div class="scr"><div class="m-demo">PROTOTIPO NO OFICIAL · DATOS FICTICIOS</div><div class="m-top"><span>← Volver</span><span>Paso 5 de 5</span></div>
+    <div class="m-body"><div class="m-step"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div><div class="m-h">Revise antes de enviar</div>
+    <div class="m-card"><b>Qué necesita</b> <u>Cambiar</u><br>Medicina · Renovación de receta<br><span class="m-p">"me da alergia todos los años y perdí la receta"</span></div><div class="m-card"><b>Paciente</b> <u>Cambiar</u></div><div class="m-card"><b>CESFAM</b> Confraternidad <u>Cambiar</u></div><div class="m-card"><b>Contacto</b> <u>Cambiar</u></div><div class="m-btn pri">Enviar solicitud</div></div></div></div>
+  <div><span class="sid">S6</span> <span class="L LA">A</span><h3>Revisar y enviar</h3>
+    <div class="fixes"><span>U21</span><span>U22</span><span>U34</span></div>
+    <p>Muestra un resumen por sección, cada una con "Cambiar". El botón de envío es grande y con contraste, y se bloquea al tocarlo para evitar dobles envíos.</p>
+    <p class="states"><b>Estados:</b> listo · enviando · error al enviar (reintentar sin perder datos).</p></div>
+</div>
+
+<div class="screen">
+  <div class="phone"><div class="scr"><div class="m-demo">PROTOTIPO NO OFICIAL · DATOS FICTICIOS</div><div class="m-top"><span>Telesalud</span><span>Ayuda</span></div>
+    <div class="m-body"><div class="m-h">✓ Solicitud enviada</div><div class="m-card">Su código de seguimiento:<br><b style="font-size:14px;letter-spacing:.05em">7C21F0B94D</b><br><span class="m-chip">Copiar</span><span class="m-chip">Compartir</span></div>
+    <div class="m-h" style="font-size:11.5px">Qué pasará ahora</div><div class="m-time"><div>El equipo de su CESFAM revisará su solicitud, de lunes a viernes de 8:00 a 17:00.</div><div>Le contactarán por teléfono o correo.</div><div>No vaya al CESFAM hasta que lo/la contacten.</div></div><div class="m-btn pri">Ver el estado</div></div></div></div>
+  <div><span class="sid">S7</span> <span class="L LA">A</span><h3>Solicitud enviada</h3>
+    <div class="fixes"><span>U22</span><span>U23</span></div>
+    <p>Presenta la misma información que da hoy el sitio: el código, el horario de revisión y la indicación de no ir al CESFAM. La diferencia es una sola confirmación en vez de dos, un orden claro, el código grande con opciones para copiar y compartir, el formulario limpio y el botón "Ver el estado", que abre el seguimiento con el código ya puesto.</p>
+    <p class="small">No se promete un plazo. La respuesta puede ser una hora o una solución a distancia, tal como describen las fuentes oficiales.</p>
+    <p class="states"><b>Estados:</b> enviada · enviada sin correo (se insiste en guardar el código).</p></div>
+</div>
+
+<div class="screen">
+  <div class="phone"><div class="scr"><div class="m-demo">PROTOTIPO NO OFICIAL · DATOS FICTICIOS</div><div class="m-top"><span>← Inicio</span><span>Estado</span></div>
+    <div class="m-body"><div class="m-h">Estado de su solicitud</div><div class="m-p">Código 7C21F0B94D</div>
+    <div class="m-time"><div>✓ <b>Ingresada</b><br><span class="m-p">La recibimos. Espera la revisión del equipo.</span></div><div>● <b>En revisión</b><br><span class="m-p">El equipo está viendo su caso. Esté atento/a al teléfono.</span></div><div class="m-p">○ <b>Finalizada</b><br>El equipo terminó de gestionar su solicitud.</div></div><div class="m-btn">Anular solicitud</div></div></div></div>
+  <div><span class="sid">S8</span> <span class="L LA">A</span><h3>Consultar estado</h3>
+    <div class="fixes"><span>U24</span><span>U25</span></div>
+    <ul>
+      <li><strong>Consulta:</strong> la misma, con código y apellido paterno. El error dice qué revisar ("el código está en su correo; el apellido es el paterno del paciente").</li>
+      <li><strong>Estados:</strong> los mismos tres, cada uno con una explicación basada en la información oficial.</li>
+      <li><strong>Mejora adicional <span class="L LB">B</span>:</strong> que "Finalizada" muestre el resultado (hora, resolución a distancia o anulación). Aparece solo en el modo presentación.</li>
+      <li><strong>Oportunidad <span class="L LC">C</span>:</strong> "Mis solicitudes" sin código, con sesión. Aparece solo en S12.</li>
+    </ul>
+    <p class="states"><b>Estados:</b> buscar · ingresada · en revisión · finalizada · código no encontrado.</p></div>
+</div>
+
+<div class="screen">
+  <div class="phone"><div class="scr"><div class="m-demo">PROTOTIPO NO OFICIAL · DATOS FICTICIOS</div><div class="m-top"><span>Telesalud</span><span>Ayuda</span></div>
+    <div class="m-body"><div class="m-h">Cómo funciona</div><div class="m-card">¿Qué pasa después de enviar?</div><div class="m-card">¿Me van a llamar?</div><div class="m-card">No sé qué elegir</div><div class="m-card">¿Puedo pedir por otra persona?</div><div class="m-card">No sé en qué CESFAM estoy</div><div class="m-card">¿Qué hago si no puedo usar internet?</div></div></div></div>
+  <div><span class="sid">S9 · S10 · S11</span> <span class="L LA">A</span><h3>Anular, ayuda y errores</h3>
+    <div class="fixes"><span>U23</span><span>U26</span><span>U28</span><span>U31</span><span>U32</span></div>
+    <ul>
+      <li><strong>S9 Anular:</strong> los mismos campos (código y apellido), más un paso de confirmación.</li>
+      <li><strong>S10 Ayuda:</strong> el tutorial pasa de imágenes a texto, con preguntas de persona y el enlace al video oficial. Las respuestas usan solo información publicada.</li>
+      <li><strong>S11 Errores:</strong> mensajes en español con qué hacer y los datos conservados. Nunca un error técnico.</li>
+    </ul></div>
+</div>
+
+<h3 style="margin-top:28px">Demostraciones de oportunidad (fuera del rediseño base)</h3>
+<div class="screen">
+  <div class="phone"><div class="scr"><div class="m-demo">PROTOTIPO NO OFICIAL · DATOS FICTICIOS</div><div class="m-top"><span>Telesalud</span><span></span></div>
+    <div class="m-body"><div class="m-card" style="border-color:#5b4a9e"><b>Simulación de una posibilidad</b><br>No sabemos qué datos obtiene hoy Telesalud con ClaveÚnica.</div><div class="m-h">Elija una persona ficticia</div><div class="m-card">María, 72 años</div><div class="m-card">Juan, 34 años</div></div></div></div>
+  <div><span class="sid">S12</span> <span class="L LC">C</span><h3>Experiencia con identidad y CESFAM precargados</h3>
+    <p>Muestra cómo se sentiría el recorrido si la identidad y el CESFAM de inscripción vinieran precargados: la persona solo confirmaría. En pantalla se presenta como <strong>simulación de una oportunidad</strong>, con un aviso visible, y se usa en el modo presentación para comparar las dos experiencias. No forma parte del recorrido base.</p>
+    <p><span class="sid">S0</span> <span class="L LB">B</span> <strong>Página por CESFAM:</strong> un ejemplo de lo que podría encontrar quien busca "consultorio Confraternidad", con dirección, horario y un botón que abre la solicitud con ese CESFAM ya elegido. Requiere que MINSAL publique esas páginas.</p></div>
+</div>
+</section>
+
+<!-- ================================================= -->
+<section id="presentacion">
+<h2>Modo presentación</h2>
+<p>Quien reciba el enlace debe poder entender solo, sin que nadie le explique, qué estaba mal, qué cambió y por qué es mejor. El modo presentación es la puerta de entrada de la demo para MINSAL.</p>
+
+<h4>1. Recorrido guiado "antes y después"</h4>
+<p>Son 8 momentos del recorrido. En cada uno, la captura del sitio actual aparece junto a la misma pantalla rediseñada y funcionando, con tres líneas: <em>qué pasaba</em>, <em>qué cambió</em> y <em>por qué es mejor</em>, más la marca de nivel (A, B o C). Ejemplo:</p>
+<div class="cmp">
+  <div><h4>Hoy · Tipo de prestador</h4><p class="small">Un menú con 12 profesiones (Asistente Social, Matrona, "Profesionales Chile Crece Contigo"…), luego otro con motivos y otro con especificidad. La persona tiene que saber cómo se organiza el CESFAM.</p><p class="small muted">Captura: formulario actual, menú de prestador</p></div>
+  <div><h4>Propuesta · ¿Con qué necesita ayuda? <span class="L LA">A</span></h4><p class="small">Grupos por necesidad que llevan a las mismas categorías, cada una explicada. Existe "No estoy seguro/a". <strong>Al CESFAM le llega exactamente el mismo prestador, motivo y especificidad.</strong></p><p class="small muted">Pantalla viva: S2</p></div>
+</div>
+<p class="small">Los 8 momentos son: encontrar el servicio, la portada, el aviso de emergencia, los datos personales en el celular, la elección de categoría, los errores de validación, la confirmación y el seguimiento.</p>
+
+<h4>2. "La misma solicitud"</h4>
+<p>Al terminar una solicitud en la demo se muestra, lado a lado, cómo se habría visto en el formulario actual con los mismos valores en los mismos campos. Así queda probado que el rediseño no exige cambiar lo que recibe el CESFAM.</p>
+
+<h4>3. Qué es solo experiencia y qué requiere cambios</h4>
+<p>Es una vista que ordena todas las mejoras en los niveles A, B y C, y deja ver por separado las mejoras B (resultado de "Finalizada", campos para quien ayuda, enviar sin categoría) y la simulación C (datos precargados).</p>
+
+<h4>4. Pestaña técnica (para especialistas)</h4>
+<p>Muestra la solicitud expresada como recursos FHIR R4 y el catálogo usado. Es invisible en el recorrido del paciente.</p>
+
+<h4>5. Transparencia de la demo</h4>
+<p>Una sección "Qué es real y qué es simulado": los datos son ficticios, nada se envía a Telesalud, y ClaveÚnica y los resultados de "Finalizada" están simulados.</p>
+</section>
+
+<!-- ================================================= -->
+<section id="medir">
+<h2>Qué mediremos (sin cifras todavía)</h2>
+<p>La demo está diseñada para reducir campos, toques, tiempo y carga mental, pero no afirmamos ninguna cifra hasta medirla. Cuando el prototipo funcione, mediremos lo mismo en el formulario actual (sin enviar) y en la demo:</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Qué</th><th>Cómo</th></tr></thead>
+<tbody>
+<tr><td>Controles visibles y obligatorios</td><td>Conteo en ambos, con los mismos datos de ejemplo</td></tr>
+<tr><td>Toques y caracteres escritos</td><td>Registro automático en la demo y guion equivalente en el sitio actual</td></tr>
+<tr><td>Tiempo para completar</td><td>Personas reales, con un caso de ejemplo igual en ambos</td></tr>
+<tr><td>Errores y correcciones</td><td>Conteo durante esas mismas sesiones</td></tr>
+<tr><td>Comprensión de qué pasa después</td><td>Dos preguntas al terminar</td></tr>
+<tr><td>Accesibilidad</td><td>Revisión automática más prueba con zoom y lector de pantalla</td></tr>
+</tbody></table></div>
+<p class="small muted">Los resultados medidos se agregarán al modo presentación y al mensaje para MINSAL.</p>
+</section>
+
+<!-- ================================================= -->
+<section id="cobertura">
+<h2>Cobertura de los 35 hallazgos</h2>
+<p id="covsum" class="small"></p>
+<div class="tablewrap"><table>
+<thead><tr><th>Hallazgo</th><th>Cómo lo aborda la demo</th><th>Nivel</th></tr></thead>
+<tbody id="cov"></tbody></table></div>
+</section>
+
+<!-- ================================================= -->
+<section id="tecnico">
+<h2>Anexo técnico: FHIR</h2>
+<p>Esta sección es para quien revise la parte técnica. El paciente nunca ve nada de esto.</p>
+<details>
+<summary>Correspondencia con FHIR R4 / CL Core</summary>
+<p class="small">La demo guarda cada solicitud con los mismos datos del formulario, organizados para poder traducirse a recursos FHIR R4. No hay servidor FHIR; la traducción solo se muestra en la pestaña técnica. Sirve de señal de que el prototipo no inventa un modelo incompatible con la salud digital chilena.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Dato de la solicitud</th><th>Recurso FHIR R4</th><th>Nota</th></tr></thead>
+<tbody>
+<tr><td>Paciente</td><td>Patient (perfil de paciente CL Core)</td><td>RUN como identificador, nombre social, sexo, género, fecha de nacimiento, dirección, teléfonos</td></tr>
+<tr><td>Establecimiento</td><td>Organization / Location</td><td>El identificador que usa hoy el catálogo</td></tr>
+<tr><td>La solicitud</td><td>ServiceRequest</td><td>Prestador, motivo y especificidad como códigos de un CodeSystem local; texto adicional en note</td></tr>
+<tr><td>Seguimiento</td><td>Task</td><td>El mismo código de 10 caracteres como identificador; los tres estados actuales como businessStatus</td></tr>
+</tbody></table></div>
+<p class="small muted">Los nombres exactos de los perfiles se verifican contra la guía CL Core vigente al implementar.</p>
+</details>
+</section>
+
+<!-- ================================================= -->
+<section id="fases">
+<h2>Fases y decisiones</h2>
+<ol>
+  <li><strong>Rediseño base, nivel A:</strong> S1–S11, catálogo real, validaciones, accesibilidad y guardado del borrador. Esta fase sola ya debe ser claramente mejor que el sitio actual.</li>
+  <li><strong>Modo presentación:</strong> recorrido antes/después con las capturas de la auditoría, "La misma solicitud", la vista de niveles y la transparencia.</li>
+  <li><strong>Oportunidades y técnica:</strong> S12 <span class="L LC">C</span>, S0 y las mejoras <span class="L LB">B</span> en presentación, y la pestaña FHIR.</li>
+  <li><strong>Medir y entregar:</strong> mediciones antes/después, prueba en celular real, publicación y mensaje para MINSAL.</li>
+</ol>
+<div class="tablewrap"><table>
+<thead><tr><th>Decisión</th><th>Estado</th></tr></thead>
+<tbody>
+<tr><td>Publicación</td><td>Decidido: enlace web a un sitio estático, sin servidor propio</td></tr>
+<tr><td>Cómo se construye el frontend</td><td>Decidido: Vite + React + TypeScript, sin librerías de interfaz</td></tr>
+<tr><td>Aspecto visual</td><td>Estructura y colores reconocibles, sin logos oficiales y con la franja "prototipo no oficial"</td></tr>
+</tbody></table></div>
+</section>
+</main>
+<script>
+(function(){
+  var root=document.documentElement,TK='telesalud-theme';try{var t=localStorage.getItem(TK);if(t)root.setAttribute('data-theme',t)}catch(e){}
+  document.getElementById('themebtn').onclick=function(){var d=root.getAttribute('data-theme')==='dark'||(!root.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme: dark)').matches);var n=d?'light':'dark';root.setAttribute('data-theme',n);try{localStorage.setItem(TK,n)}catch(e){}};
+  // [hallazgo, cómo, niveles]
+  var C=[
+   ['U01 Terceros antes que el canal oficial en buscadores','Ejemplo de página por CESFAM (S0)','B'],
+   ['U02 Promesa "menos de 24 horas"','Textos sin plazos inventados; descripción para buscadores corregida','A'],
+   ['U03 Botón principal bajo un bloque vacío','Acciones visibles sin scroll','A'],
+   ['U04 Botones que no dicen lo que hacen','Mismas acciones con nombres de persona','A'],
+   ['U05 Beneficio de iniciar sesión escondido','Acceso visible y descrito sin prometer ahorro; precarga solo como simulación (S12)','A · C'],
+   ['U06 Dos sistemas de acceso','Jerarquía clara entre ClaveÚnica y cuenta propia','A'],
+   ['U07 Emergencia ilegible','Franja fija, legible, con enlaces para llamar','A'],
+   ['U08 Zoom bloqueado','Zoom permitido y control de tamaño de letra','A'],
+   ['U09 Sin teclado ni autocompletado adecuados','Tipos de campo, inputmode y autocomplete','A'],
+   ['U10 Fecha sin formato','Tres casillas numéricas; mismo formato enviado','A'],
+   ['U11 Errores solo con color','Mensaje en texto, aria-invalid y resumen','A'],
+   ['U12 Región y comuna dos veces','La comuna de la dirección filtra los establecimientos; se envían los mismos campos','A'],
+   ['U13 Lista de comunas con scroll anidado','Buscador de comuna','A'],
+   ['U14 Saber en qué centro está inscrito','Centros con dirección y ayuda "no sé mi centro"; precarga solo en S12','A · C'],
+   ['U15 Teléfonos apretados, radios pequeños','Campos a todo el ancho y controles de 48 px','A'],
+   ['U16 No se avisa de la llamada','Aviso general y verdadero; número específico por CESFAM como mejora','A · B'],
+   ['U17 Traducir la necesidad al idioma interno','Lista guiada por necesidad, "No estoy seguro/a" y catálogo completo explicado; "enviar sin categoría" como mejora','A · B'],
+   ['U18 Especificidad repetida','Se preselecciona si hay una sola; edad de Dental preseleccionada','A'],
+   ['U19 Texto obligatorio sin guía','Guía con ejemplo de qué escribir','A'],
+   ['U20 Por qué se pide discapacidad','Explicación neutra, sin prometer prioridad','A'],
+   ['U21 Enviar con bajo contraste','Botón con contraste AA','A'],
+   ['U22 Confirmación sin guía; riesgo de duplicado','Una confirmación, formulario limpio, envío bloqueado, "Ver el estado"','A'],
+   ['U23 Expectativas que no calzan','"Qué pasará ahora" con información oficial, sin plazos inventados','A'],
+   ['U24 Error genérico al consultar','Error que dice qué revisar; "Mis solicitudes" sin código como oportunidad','A · C'],
+   ['U25 Estados sin explicación','Los mismos 3 estados explicados; resultado de "Finalizada" como mejora','A · B'],
+   ['U26 Tutorial en imágenes','Ayuda en texto con preguntas de persona','A'],
+   ['U27 Sin estructura accesible','Encabezados, landmarks, alt, íconos con texto','A'],
+   ['U28 Errores técnicos en inglés','Mensajes en español, reintentar, datos guardados','A'],
+   ['U29 Pie fijo con créditos','Pie liviano no fijo; créditos en "Acerca de"','A'],
+   ['U30 Subtítulos con bajo contraste','Paleta con contraste AA','A'],
+   ['U31 No inscritos sin camino','Explicación de cómo inscribirse','A'],
+   ['U32 Sin alternativas al formulario','Ayuda "si no puede usar internet" con canales publicados','A'],
+   ['U33 Lenguaje formal y trato mezclado','"Usted" en todo el sitio, vocabulario de persona','A'],
+   ['U34 No se sabe cuánto falta','Barra de 5 pasos y revisión','A'],
+   ['U35 No se puede pedir por otra persona','Explicación de cómo hacerlo con los campos actuales; campos propios como mejora','A · B']
+  ];
+  var tag=function(s){return s.split(' · ').map(function(x){return '<span class="L L'+x+'">'+x+'</span>'}).join(' ')};
+  document.getElementById('cov').innerHTML=C.map(function(c){return '<tr><td>'+c[0]+'</td><td>'+c[1]+'</td><td style="white-space:nowrap">'+tag(c[2])+'</td></tr>'}).join('');
+  var withA=C.filter(function(c){return c[2].indexOf('A')>=0}).length, onlyA=C.filter(function(c){return c[2]==='A'}).length, onlyB=C.filter(function(c){return c[2]==='B'}).length;
+  document.getElementById('covsum').textContent='Según nuestra clasificación, '+withA+' de 35 hallazgos se abordan al menos en parte solo con cambios de experiencia (nivel A), y '+onlyA+' se resuelven por completo en ese nivel. '+(onlyB?onlyB+' depende'+(onlyB>1?'n':'')+' solo de un cambio de MINSAL. ':'')+'Es una clasificación de diseño, no una medición.';
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Telesalud: auditoría e investigación</title>
+<style>
+:root{
+  --bg:#fbfaf7;--surface:#ffffff;--text:#1d1f23;--muted:#5d6470;--line:#e3e1db;
+  --accent:#0f6e6a;--accent-soft:#e3f1ef;--warn:#8a5200;--warn-soft:#fdf1dc;
+  --crit:#a3312a;--crit-soft:#fbe7e5;--ok:#2f6b2f;--ok-soft:#e6f2e3;--code:#f1efe9;
+  --hv:#1f5fa8;--od:#6a4aa0;--inf:#8a5200;--hip:#a3312a;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15171a;--surface:#1d2024;--text:#e7e8ea;--muted:#a0a6b0;--line:#30343a;
+    --accent:#5cc2bb;--accent-soft:#17312f;--warn:#e7b25a;--warn-soft:#322715;
+    --crit:#f08a82;--crit-soft:#3a1f1d;--ok:#8fcf87;--ok-soft:#1c2e1b;--code:#262a2f;
+    --hv:#7fb2ee;--od:#b59be6;--inf:#e7b25a;--hip:#f08a82;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15171a;--surface:#1d2024;--text:#e7e8ea;--muted:#a0a6b0;--line:#30343a;
+  --accent:#5cc2bb;--accent-soft:#17312f;--warn:#e7b25a;--warn-soft:#322715;
+  --crit:#f08a82;--crit-soft:#3a1f1d;--ok:#8fcf87;--ok-soft:#1c2e1b;--code:#262a2f;
+  --hv:#7fb2ee;--od:#b59be6;--inf:#e7b25a;--hip:#f08a82;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,sans-serif}
+main{max-width:1040px;margin:0 auto;padding:32px 16px 80px}
+header.top{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+h1{font-size:1.9rem;line-height:1.2;margin:0 0 6px}
+.byline{color:var(--muted);font-size:.9rem}
+h2{font-size:1.35rem;margin:48px 0 10px;padding-top:14px;border-top:1px solid var(--line)}
+h3{font-size:1.05rem;margin:26px 0 8px}
+p{margin:0 0 12px}
+.lead{font-size:1.05rem}
+ul,ol{margin:0 0 14px;padding-left:22px}
+li{margin:4px 0}
+a{color:var(--accent)}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.88em}
+nav.toc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:20px 0}
+nav.toc ol{margin:0;columns:2;column-gap:28px}
+@media (max-width:640px){nav.toc ol{columns:1}}
+.callout{border-radius:10px;padding:14px 16px;margin:16px 0;border:1px solid var(--line);background:var(--surface)}
+.callout.key{background:var(--accent-soft);border-color:transparent}
+.callout.warn{background:var(--warn-soft);border-color:transparent}
+.callout.crit{background:var(--crit-soft);border-color:transparent}
+.callout > strong:first-child{display:block;margin-bottom:4px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:16px 0}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.stat b{display:block;font-size:1.5rem;line-height:1.2}
+.stat span{color:var(--muted);font-size:.85rem}
+.stat.bad b{color:var(--crit)}
+.tablewrap{overflow-x:auto;margin:12px 0 18px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{background:var(--code);font-weight:600}
+tr:last-child td{border-bottom:0}
+td.num{color:var(--muted);white-space:nowrap}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+.flow span{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:.9rem}
+.flow i{color:var(--muted);font-style:normal}
+.tag{display:inline-block;font-size:.72rem;font-weight:600;letter-spacing:.02em;padding:1px 7px;border-radius:999px;border:1px solid currentColor;white-space:nowrap;vertical-align:1px}
+.t-hv{color:var(--hv)} .t-od{color:var(--od)} .t-inf{color:var(--inf)} .t-hip{color:var(--hip)}
+.sev{display:inline-block;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.s-Crítica{background:var(--crit);color:#fff}
+.s-Alta{background:var(--crit-soft);color:var(--crit)}
+.s-Media{background:var(--warn-soft);color:var(--warn)}
+.s-Baja{background:var(--code);color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:10px 18px;font-size:.88rem;margin:10px 0 4px}
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.filters label{font-size:.85rem;color:var(--muted);display:flex;gap:6px;align-items:center}
+select,input[type=text],textarea{font:inherit;font-size:.85rem;padding:4px 6px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+.finding{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:10px 0}
+.finding .fh{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px}
+.finding .fh b{font-size:1rem}
+.finding .fid{font-family:ui-monospace,monospace;font-size:.8rem;color:var(--muted)}
+.finding dl{display:grid;grid-template-columns:150px 1fr;gap:4px 12px;margin:6px 0 0;font-size:.9rem}
+.finding dt{color:var(--muted)}
+.finding dd{margin:0}
+@media (max-width:640px){.finding dl{grid-template-columns:1fr}.finding dt{margin-top:6px}}
+.pill{font-size:.75rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+button{font:inherit;font-size:.9rem;padding:6px 12px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--accent)}
+.muted{color:var(--muted)}
+.small{font-size:.85rem}
+.themebtn{float:right;background:transparent;color:var(--muted);border-color:var(--line);font-size:.8rem;padding:4px 10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:720px){.grid2{grid-template-columns:1fr}}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.box.ok{background:var(--ok-soft);border-color:transparent}
+.box.no{background:var(--crit-soft);border-color:transparent}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:12px 0}
+.gallery a{display:block;text-decoration:none;color:var(--muted);font-size:.78rem}
+.gallery img{width:100%;height:210px;object-fit:cover;object-position:top;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.ds td select{max-width:220px}
+@media print{.themebtn,.toolbar,.filters{display:none}h2{break-after:avoid}.tablewrap{overflow:visible}.finding{break-inside:avoid}}
+</style>
+</head>
+<body>
+<main>
+
+<header class="top">
+  <button class="themebtn" id="themebtn" type="button">Cambiar tema</button>
+  <h1>Telesalud: auditoría de la experiencia del paciente</h1>
+  <div class="byline">Versión 3 · 20 de octubre de 2026 · <a href="https://felipe-droguett.netlify.app/">Felipe Droguett O.</a> · Sin datos personales.</div>
+</header>
+
+<div class="callout">
+  <strong>Cómo leer este documento</strong>
+  Cada afirmación lleva una etiqueta de certeza:
+  <div class="legend">
+    <span><span class="tag t-hv">HECHO VERIFICADO</span> medido en el sitio o leído en una fuente</span>
+    <span><span class="tag t-od">OBSERVACIÓN DIRECTA</span> visto en el recorrido o en capturas, sin medición</span>
+    <span><span class="tag t-inf">INFERENCIA</span> conclusión razonada, no comprobada</span>
+    <span><span class="tag t-hip">HIPÓTESIS POR VALIDAR</span> hay que probarla antes de decidir</span>
+  </div>
+</div>
+
+<nav class="toc" aria-label="Contenido">
+  <ol>
+    <li><a href="#resumen">Resumen</a></li>
+    <li><a href="#interno">Cómo funciona Telesalud por dentro</a></li>
+    <li><a href="#auditoria">Auditoría UX/UI (35 hallazgos)</a></li>
+    <li><a href="#datos-conocidos">Datos que el sistema ya tiene y vuelve a pedir</a></li>
+    <li><a href="#bien">Qué hace bien (no reconstruir)</a></li>
+    <li><a href="#taxonomia">La taxonomía de categorías</a></li>
+    <li><a href="#legal">Accesibilidad: lo que exige la norma</a></li>
+    <li><a href="#fuentes">Método y fuentes</a></li>
+  </ol>
+</nav>
+
+<!-- ============================================================ -->
+<section id="resumen">
+<h2>Resumen</h2>
+<p class="lead">Telesalud resuelve bien el lado administrativo (triage humano, cobertura nacional, seguimiento), pero la experiencia del paciente tiene problemas graves de accesibilidad y de lenguaje, sobre todo en el celular. Casi todo se puede corregir cambiando solo lo que ve el paciente, sin tocar los datos que recibe el CESFAM.</p>
+<ul>
+  <li><strong>Accesibilidad:</strong> el zoom está bloqueado, no hay encabezados, el tutorial es solo imágenes sin texto alternativo, y el aviso de emergencia (131) es el texto menos legible del formulario (12 px, contraste 4,21:1). <span class="tag t-hv">HECHO VERIFICADO</span></li>
+  <li><strong>Formulario:</strong> 25 controles, ningún campo activa el teclado numérico ni el autocompletado del celular, y los campos vacíos se ponen rojos sin decir qué falta. <span class="tag t-hv">HECHO VERIFICADO</span></li>
+  <li><strong>Lenguaje:</strong> el paciente debe traducir su necesidad a 12 prestadores y 63 motivos que se solapan. Pero el triagista "define el tipo de prestación", así que queda por validar cuánto afecta una categoría mal elegida a la atención. <span class="tag t-hip">HIPÓTESIS POR VALIDAR</span></li>
+  <li><strong>Expectativas:</strong> el buscador promete "menos de 24 horas", mientras que el promedio 2021–2024 fue de 8 a 11 días, y un CESFAM informa 20 días hábiles. Además, en ese CESFAM la solicitud se anula si no se contesta la llamada tres veces. <span class="tag t-hv">HECHO VERIFICADO</span></li>
+  <li><strong>Datos repetidos:</strong> se piden datos que el Estado ya tiene (CESFAM de inscripción, identidad). Iniciar sesión podría evitarlo, pero la página no lo explica, y no sabemos qué se rellena solo. <span class="tag t-hip">HIPÓTESIS POR VALIDAR</span></li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="interno">
+<h2>Cómo funciona Telesalud por dentro</h2>
+<p>El paciente ve un formulario. Detrás hay un equipo con roles definidos y plazos que, según la fuente, no coinciden entre sí.</p>
+
+<h3>Roles y flujo del lado del CESFAM</h3>
+<ul>
+  <li><strong>Roles</strong> <span class="tag t-hv">HECHO VERIFICADO</span>: Triagista (profesional), Gestor/a de Casos, Administrativo/a, Supervisor/a, Líder de la estrategia y Referente técnico. Si no hay médico, el triage puede hacerlo enfermera, matrona, nutricionista, psicólogo, kinesiólogo u otro.</li>
+  <li><strong>Qué hace el triagista</strong> <span class="tag t-hv">HECHO VERIFICADO</span>: "Revisar los datos del formulario… complementar con la revisión del registro clínico electrónico, la ficha clínica y/o contacto telefónico. Determinar la vía de atención (presencial o remota), la priorización (alta, media o baja) y definir el tipo de prestación".</li>
+  <li><strong>Cómo termina una solicitud</strong> <span class="tag t-hv">HECHO VERIFICADO</span>, de tres formas: una llamada del personal clínico, un agendamiento que hace el administrativo (que "asigna cupo en agenda y entrega la información de manera telefónica"), o la gestión de casos.</li>
+  <li><strong>Rendimiento esperado</strong> <span class="tag t-hv">HECHO VERIFICADO</span>: el triagista revisa de 6 a 8 solicitudes por hora y el administrativo hace de 10 a 11 agendamientos por hora.</li>
+  <li><strong>Criterio de prioridad</strong> <span class="tag t-hv">HECHO VERIFICADO</span>: según las Orientaciones SSMS, la prioridad Alta incluye a "personas mayores de 60 años y personas en situación de discapacidad". <span class="tag t-inf">INFERENCIA</span>: por eso importan la fecha de nacimiento y la casilla de discapacidad, aunque el formulario no lo explica.</li>
+  <li><strong>Atenciones solo presenciales</strong> <span class="tag t-hv">HECHO VERIFICADO</span>: odontológica, controles de 0–6 meses y niño sano, violencia intrafamiliar, heridas, entre otras. Lo que se resuelve a distancia típicamente son resultados de exámenes, recetas y licencias.</li>
+  <li><strong>Canales</strong> <span class="tag t-hv">HECHO VERIFICADO</span>: los Lineamientos mencionan acceso web, por redes sociales y "vía telefónica". La norma técnica 237 permite que una persona que no domina la tecnología sea "asistida por una persona de su confianza o… un profesional, técnico o administrativo". El sitio no menciona ninguna de estas alternativas. <span class="tag t-od">OBSERVACIÓN DIRECTA</span></li>
+  <li><strong>Lo que no encontramos</strong>: la lista oficial de estados y su significado, los códigos de cierre, y reglas sobre el texto libre o la reclasificación de categorías.</li>
+</ul>
+
+<h3 id="plazos">Los plazos: cuatro estándares distintos</h3>
+<div class="tablewrap"><table>
+<thead><tr><th>Fuente</th><th>Qué mide</th><th>Alta</th><th>Media</th><th>Baja</th></tr></thead>
+<tbody>
+<tr><td>Orientaciones SSMS 2022</td><td>Cierre, después de apertura + priorización (≤ 2 días hábiles)</td><td>1 día hábil</td><td>3 días hábiles</td><td>5 días hábiles</td></tr>
+<tr><td>Orientaciones SSMS 2022</td><td>Atención de salud, desde la creación</td><td>4 días hábiles</td><td>7 días hábiles</td><td>10 días hábiles</td></tr>
+<tr><td>Lineamientos MINSAL 2023</td><td>Plazo de agendamiento</td><td>24–48 h</td><td>48–72 h</td><td>7 días</td></tr>
+<tr><td>RPSP 2025, metas "en general"</td><td>—</td><td>24–48 h</td><td>7–10 días</td><td>15 días</td></tr>
+<tr><td>RPSP 2025, <strong>resultado</strong> 2021–2024</td><td>Media nacional</td><td>8 días</td><td colspan="2">11 días</td></tr>
+<tr><td>CESFAM Madre Teresa de Calcuta (Ancora UC), 2024</td><td>Lo que se informa al paciente</td><td colspan="3">"20 días hábiles"</td></tr>
+<tr><td>telesalud.gob.cl (meta description)</td><td>Lo que ve el paciente en el buscador</td><td colspan="3">"habitualmente en menos de 24 horas"</td></tr>
+<tr><td>Servicio de Salud Metropolitano Central</td><td>Nota de prensa</td><td colspan="3">"plazo aproximado de 72 horas"</td></tr>
+</tbody></table></div>
+<p class="small muted">Todas las filas son <span class="tag t-hv">HECHO VERIFICADO</span> sobre lo que dice cada fuente, no sobre el tiempo real hoy.</p>
+
+<h3>Datos de uso (2021–2024, RPSP 2025)</h3>
+<div class="stats">
+  <div class="stat"><b>5,04 M</b><span>solicitudes, 1,29 M personas, 320 establecimientos</span></div>
+  <div class="stat"><b>15,3%</b><span>de las solicitudes, de mayores de 65 años</span></div>
+  <div class="stat"><b>28,4%</b><span>resolución remota · 62,7% presencial</span></div>
+  <div class="stat"><b>6,4%</b><span>cierre administrativo, "principalmente duplicación" y no inscritos</span></div>
+</div>
+<ul>
+  <li>Motivos más frecuentes: medicina general (28,9%), control crónico (10,4%) y odontología (7,7%). <span class="tag t-hv">HECHO VERIFICADO</span></li>
+  <li>Distribución por prioridad: alta 12,1%, media 39,7% y baja 46,2%. <span class="tag t-hv">HECHO VERIFICADO</span></li>
+  <li>El artículo lo escribe el propio equipo implementador (OPS/MINSAL), que lo declara como conflicto de interés. Hay una inconsistencia interna sobre cuántos establecimientos tuvo el piloto de 2021. <span class="tag t-hv">HECHO VERIFICADO</span></li>
+  <li>Volumen reciente: más de 4,19 millones de solicitudes en 2025 y más de 2,99 millones en el primer semestre de 2026. <span class="tag t-hv">HECHO VERIFICADO</span></li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="auditoria">
+<h2>Auditoría UX/UI</h2>
+<p>La auditoría cubre el recorrido completo, desde la búsqueda hasta consultar el estado, en celular (390×844 y 320 px) y escritorio (1366×768).</p>
+<ul class="small muted">
+  <li><strong>Mediciones:</strong> se hicieron el 29-09-2026 con un navegador automático sobre el sitio público y datos de prueba ("AAAA", "PRUEBA"), sin enviar nada.</li>
+  <li><strong>Capturas del recorrido real:</strong> una solicitud real enviada por el autor; tienen datos personales y no se incluyen. Se citan como "recorrido real".</li>
+  <li><strong>Capturas de la auditoría:</strong> las A01–A12 son las mediciones de esta auditoría, están en <code>evidencia/</code> y solo tienen datos de prueba.</li>
+</ul>
+
+<div class="legend small">
+  <span><span class="sev s-Crítica">Crítica</span> puede impedir el acceso o afectar la seguridad</span>
+  <span><span class="sev s-Alta">Alta</span> causa abandono, error o solicitud mal dirigida</span>
+  <span><span class="sev s-Media">Media</span> fricción o demora notoria</span>
+  <span><span class="sev s-Baja">Baja</span> molestia o pulido</span>
+</div>
+
+<div class="stats" id="sevstats"></div>
+
+<div class="filters" role="group" aria-label="Filtros de hallazgos">
+  <label>Severidad <select id="f-sev"><option value="">Todas</option><option>Crítica</option><option>Alta</option><option>Media</option><option>Baja</option></select></label>
+  <label>Tipo <select id="f-tipo"><option value="">Todos</option><option>UX</option><option>UI</option><option>Accesibilidad</option><option>Contenido</option><option>Administrativo</option><option>Técnico</option><option>Externo</option></select></label>
+  <label>Etapa <select id="f-etapa"><option value="">Todas</option></select></label>
+  <label>Certeza <select id="f-cert"><option value="">Todas</option><option value="hv">Hecho verificado</option><option value="od">Observación directa</option><option value="inf">Inferencia</option><option value="hip">Hipótesis</option></select></label>
+  <span class="small muted" id="f-count"></span>
+</div>
+<div id="findings"></div>
+
+<h3>Evidencia de la auditoría</h3>
+<div class="gallery">
+  <a href="evidencia/A01-movil-inicio.png"><img src="evidencia/A01-movil-inicio.png" alt="Inicio en celular: bloque verde vacío y botones bajo la mitad de la pantalla">A01 · Inicio, celular</a>
+  <a href="evidencia/A02-movil-formulario-inicio.png"><img src="evidencia/A02-movil-formulario-inicio.png" alt="Inicio del formulario en celular con el aviso rosado">A02 · Formulario y aviso rosado</a>
+  <a href="evidencia/A03-movil-formulario-contacto-detalle.png"><img src="evidencia/A03-movil-formulario-contacto-detalle.png" alt="Contacto y detalle: teléfonos lado a lado con etiquetas cortadas">A03 · Contacto y detalle</a>
+  <a href="evidencia/A04-movil-lista-comunas.png"><img src="evidencia/A04-movil-lista-comunas.png" alt="Lista de comunas: 9 de 52 visibles, tapa la cabecera">A04 · Lista de comunas</a>
+  <a href="evidencia/A05-movil-validacion.png"><img src="evidencia/A05-movil-validacion.png" alt="Validación: Nombre vacío en rojo sin mensaje">A05 · Validación</a>
+  <a href="evidencia/A06-movil-login.png"><img src="evidencia/A06-movil-login.png" alt="Pantalla de inicio de sesión con ClaveÚnica y usuario/contraseña">A06 · Inicio de sesión</a>
+  <a href="evidencia/A07-movil-tutorial.png"><img src="evidencia/A07-movil-tutorial.png" alt="Tutorial: tarjetas que son imágenes con texto">A07 · Tutorial</a>
+  <a href="evidencia/A08-movil-consultar-error.png"><img src="evidencia/A08-movil-consultar-error.png" alt="Consultar estado con código inexistente: mensaje genérico">A08 · Consultar, error</a>
+  <a href="evidencia/A09-movil-error-red-simulada.png"><img src="evidencia/A09-movil-error-red-simulada.png" alt="Falla de red simulada: error técnico en inglés">A09 · Falla de red</a>
+  <a href="evidencia/A10-escritorio-formulario.png"><img src="evidencia/A10-escritorio-formulario.png" alt="Formulario en escritorio">A10 · Formulario, escritorio</a>
+  <a href="evidencia/A11-escritorio-inicio.png"><img src="evidencia/A11-escritorio-inicio.png" alt="Inicio en escritorio">A11 · Inicio, escritorio</a>
+  <a href="evidencia/A12-movil-320px-formulario.png"><img src="evidencia/A12-movil-320px-formulario.png" alt="Formulario a 320 px de ancho">A12 · 320 px</a>
+  <a href="evidencia/A13-movil-tipo-prestador.png"><img src="evidencia/A13-movil-tipo-prestador.png" alt="Menú Tipo Prestador abierto con la lista de profesiones">A13 · Tipo de prestador</a>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="datos-conocidos">
+<h2>Datos que el sistema ya tiene y vuelve a pedir</h2>
+<p>Para usar Telesalud hay que ser usuario de Fonasa e <strong>estar inscrito en un CESFAM</strong> <span class="tag t-hv">HECHO VERIFICADO</span>. Aun así, el formulario pide a la persona datos que el Estado ya conoce.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Dato pedido</th><th>Quién ya lo tiene</th><th>Hoy</th><th>Certeza</th></tr></thead>
+<tbody>
+<tr><td>RUN, nombres, apellidos, fecha de nacimiento, sexo registral</td><td>Registro Civil (a través de ClaveÚnica)</td><td>Se escriben a mano; con sesión iniciada, no sabemos si se rellenan</td><td><span class="tag t-hip">HIPÓTESIS POR VALIDAR</span></td></tr>
+<tr><td>CESFAM donde está inscrito</td><td>Fonasa / el propio CESFAM (inscripción per cápita)</td><td>Se elige entre una lista (11 centros en San Bernardo)</td><td><span class="tag t-inf">INFERENCIA</span></td></tr>
+<tr><td>Región y comuna del establecimiento</td><td>El propio formulario: sale del establecimiento, y ya se preguntó en la dirección</td><td>Se piden dos veces</td><td><span class="tag t-hv">HECHO VERIFICADO</span></td></tr>
+<tr><td>Rango de edad en Dental ("Examen dental de 20 a 64 años")</td><td>La fecha de nacimiento, ya ingresada</td><td>Se vuelve a elegir</td><td><span class="tag t-hv">HECHO VERIFICADO</span></td></tr>
+<tr><td>Dirección, teléfono, email</td><td>Ficha del CESFAM; cuenta de Telesalud si ya la usó</td><td>Se escriben a mano, sin autocompletado del celular</td><td><span class="tag t-inf">INFERENCIA</span></td></tr>
+<tr><td>Si es persona mayor (criterio de prioridad alta)</td><td>La fecha de nacimiento</td><td>Se calcula sin decírselo a la persona</td><td><span class="tag t-inf">INFERENCIA</span></td></tr>
+</tbody></table></div>
+<div class="callout key"><strong>Observación del autor como usuario, después de enviar su solicitud</strong>"Si hubiera sabido que ingresando con mis datos del Estado era más rápido, lo habría hecho". Es un problema de comunicación, confirmado en el sitio: el botón dice "Para editar tus datos debes iniciar sesión" y la pantalla de acceso no dice que ahorre trabajo. Falta verificar qué se rellena realmente.</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="bien">
+<h2>Qué hace bien (no reconstruir)</h2>
+<div class="grid2">
+<div class="box ok">
+<ul>
+  <li>Triage humano, con ficha y teléfono. Es la parte más difícil y la que da valor.</li>
+  <li>Cobertura nacional y volumen alto (más de 4 millones de solicitudes al año).</li>
+  <li>El aviso de emergencia y Salud Responde aparecen antes del formulario.</li>
+  <li>Nombre social, género inclusivo, casillas de discapacidad y cuidador.</li>
+  <li>Tipos de documento: RUN, DNI, pasaporte, NIP y recién nacido sin RUN.</li>
+</ul>
+</div>
+<div class="box ok">
+<ul>
+  <li>La lista de comunas se puede filtrar escribiendo. <span class="tag t-hv">HECHO VERIFICADO</span></li>
+  <li>El RUN inválido muestra "Debe ingresar un RUN válido". <span class="tag t-hv">HECHO VERIFICADO</span></li>
+  <li>Con teclado, el orden es lógico y las listas se pueden operar. <span class="tag t-hv">HECHO VERIFICADO</span></li>
+  <li>A 320 px no aparece scroll horizontal. <span class="tag t-hv">HECHO VERIFICADO</span></li>
+  <li>Los campos tienen nombre accesible (aria-label). <span class="tag t-hv">HECHO VERIFICADO</span></li>
+  <li>Seguimiento en 3 estados, saludo por nombre, y opción de anular.</li>
+</ul>
+</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="taxonomia">
+<h2>La taxonomía de categorías</h2>
+<p>Observamos el catálogo en el sitio público: 12 prestadores y 63 motivos, idéntico en los CESFAM Confraternidad y El Manzano. No revisamos otras comunas. <span class="tag t-hv">HECHO VERIFICADO</span></p>
+<div class="tablewrap"><table>
+<thead><tr><th>Prestador</th><th>Motivos</th><th>Resumen</th></tr></thead>
+<tbody id="taxbody"></tbody></table></div>
+<ul>
+  <li><strong>El tercer nivel casi no agrega nada.</strong> En la mayoría de los motivos la especificidad repite el motivo; solo cambia en Medicina, Dental y Matrona. <span class="tag t-hv">HECHO VERIFICADO</span></li>
+  <li><strong>Hay solapes:</strong> Control Crónico en 4 prestadores, Renovación de receta en 2, Certificado en 3, y Rehabilitación y ayudas técnicas en 2. <span class="tag t-hv">HECHO VERIFICADO</span></li>
+  <li><strong>Hay vacíos:</strong> no existen categorías para retirar medicamentos, pedir por otra persona (salvo quien cuida a una persona con discapacidad), "no sé", ni dolor dental (Dental solo tiene exámenes por edad). <span class="tag t-hv">HECHO VERIFICADO</span></li>
+  <li><strong>Hay jerga:</strong> "Profesionales Chile Crece Contigo", "Control de la Díada", "MADIS", "Técnico en enfermería". <span class="tag t-hv">HECHO VERIFICADO</span></li>
+  <li><strong>El triagista puede corregir la categoría:</strong> "define el tipo de prestación". El costo de una categoría mal elegida quizá recae más en la persona (esfuerzo, duda, confianza) que en la atención. <span class="tag t-hip">HIPÓTESIS POR VALIDAR</span></li>
+  <li><strong>Las categorías sí se usan en la gestión:</strong> los indicadores oficiales se cortan por prestador y motivo. <span class="tag t-hv">HECHO VERIFICADO</span></li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="legal">
+<h2>Accesibilidad: lo que exige la norma</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Norma</th><th>Qué dice</th><th>Qué implica para Telesalud</th></tr></thead>
+<tbody>
+<tr><td>Decreto 1 (2015) y Ley 20.422, accesibilidad web del Estado</td><td>Exige seguir estándares W3C; según Senadis, el nivel requerido es WCAG AA. <span class="tag t-hv">HECHO VERIFICADO</span></td><td>Como sitio del Estado, Telesalud estaría obligado; varios hallazgos de esta auditoría (U07, U08, U11, U21, U26, U27) no cumplen AA. <span class="tag t-inf">INFERENCIA</span>: la exigencia de AA es la lectura de Senadis, no el texto del decreto.</td></tr>
+<tr><td>Norma técnica 237, prestaciones a distancia</td><td>Una persona que no domina la tecnología puede ser "asistida por una persona de su confianza o… un profesional, técnico o administrativo". <span class="tag t-hv">HECHO VERIFICADO</span></td><td>El sitio no menciona esta posibilidad ni la vía telefónica (U32).</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="fuentes">
+<h2>Método y fuentes</h2>
+<h3>Método de la auditoría</h3>
+<ul class="small">
+  <li><strong>Navegador:</strong> Chromium sin interfaz, con perfil temporal vacío, en celular emulado (390×844, 320 px) y escritorio (1366×768). Solo lectura: no se envió ni anuló nada.</li>
+  <li><strong>Mediciones:</strong> atributos de cada campo (tipo, inputmode, autocomplete, maxlength, etiqueta), tamaños táctiles y contraste según la fórmula WCAG 2.x, con transparencia incluida. Además: validación con datos falsos, orden de tabulación, reflujo a 320 px y falla de red simulada.</li>
+  <li><strong>Limitaciones:</strong>
+    <ul>
+      <li>La API del sitio rechaza al navegador sin interfaz en modo escritorio; por eso las pruebas de escritorio usaron un agente de usuario normal.</li>
+      <li>Google bloqueó las búsquedas automáticas.</li>
+      <li>El contraste se midió en elementos representativos, no en todos.</li>
+      <li>No se probó con lectores de pantalla ni con personas.</li>
+    </ul>
+  </li>
+</ul>
+<h3>Fuentes principales</h3>
+<ul class="small">
+  <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12262098/">González et al., Rev. Panam. Salud Pública 2025: Telesalud 2021–2024</a></li>
+  <li><a href="https://ssms.gob.cl/wp-content/uploads/2026/08/6.1-Lineamientos-Tecnicos-Gestion-Remota-de-la-Demanda.pdf">MINSAL: Lineamientos técnicos de gestión remota de la demanda (2023)</a></li>
+  <li><a href="https://ssms.gob.cl/wp-content/uploads/2026/08/6.2-Orientaciones-para-implementacion-Teletriage-2022.pdf">SSMS: Orientaciones para implementación de Teletriage (2022)</a></li>
+  <li><a href="https://portalsaluddigital.minsal.cl/wp-content/uploads/2025/01/2025.01.06_NORMA-TECNICA-PRESTACIONES-DE-SALUD-A-DISTANCIA-Y-TELEMEDICINA.pdf">MINSAL: Norma técnica 237, prestaciones a distancia y telemedicina</a></li>
+  <li><a href="https://www.paho.org/es/noticias/31-8-2021-proyecto-teletriage-chile-tecnologia-al-servicio-atencion-salud-tiempos-pandemia">OPS: proyecto Teletriage Chile (2021)</a></li>
+  <li><a href="https://www.medwave.cl/resumenescongreso/sp2021/estrataps/8339.html">Medwave: resultados del piloto (2021)</a></li>
+  <li><a href="https://mtc.ancorauc.cl/2024/08/11/telesalud/">CESFAM Madre Teresa de Calcuta (Ancora UC): preguntas frecuentes de Telesalud</a></li>
+  <li><a href="https://ssmc.gob.cl/telesalud-como-funciona-el-sistema-de-toma-de-horas-en-linea-para-cesfam-de-la-red-ssmc/">SSMC: cómo funciona Telesalud</a></li>
+  <li><a href="https://www.minsal.cl/wp-content/uploads/2026/07/Cuenta_Publica_2026_lista_publicacion.pdf">Cuenta Pública MINSAL 2026</a></li>
+  <li><a href="https://www.senadis.gob.cl/descarga/i/4430/documento">Senadis: accesibilidad web y Decreto 1</a></li>
+  <li><a href="https://www.subtel.gob.cl/wp-content/uploads/2025/02/Informe-Final-Subtel-Acceso-y-Uso-Internet-2024.pdf">SUBTEL 2024: acceso y uso de internet</a> · <a href="https://observatorioenvejecimiento.uc.cl/wp-content/uploads/2024/06/Poblacion-mayor-%C2%BFHacia-la-superacion-de-la-brecha-digital.pdf">Observatorio del Envejecimiento UC</a></li>
+  <li>Videos: canal "Salud Digital" en YouTube, "Plataforma Telesalud: Perfil Paciente" (16-04-2024) y perfiles de gestión.</li>
+</ul>
+</section>
+
+</main>
+<script>
+(function(){
+  function get(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function set(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')}
+
+  /* ---------- theme ---------- */
+  var root=document.documentElement, TK='telesalud-theme', t=get(TK);
+  if(t) root.setAttribute('data-theme',t);
+  document.getElementById('themebtn').onclick=function(){
+    var dark=root.getAttribute('data-theme')==='dark'||(!root.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme: dark)').matches);
+    var n=dark?'light':'dark'; root.setAttribute('data-theme',n); set(TK,n);
+  };
+
+  /* ---------- findings ---------- */
+  var CERT={hv:['t-hv','HECHO VERIFICADO'],od:['t-od','OBSERVACIÓN DIRECTA'],inf:['t-inf','INFERENCIA'],hip:['t-hip','HIPÓTESIS POR VALIDAR']};
+  // [id, etapa, plataforma, título, qué ocurre, evidencia, por qué es problema, consecuencia, severidad, tipos[], certeza, notaCerteza]
+  var F=[
+  ['U01','0. Buscar el CESFAM','Ambas','Al buscar el CESFAM aparecen terceros antes que el canal oficial',
+   'Al buscar "confraternidad consultorio", 4 de los 5 primeros resultados son sitios de terceros. Doctoralia dice "Reserva Hora en Consultorio Confraternidad". Telesalud aparece con un título genérico, no con el nombre del CESFAM.',
+   'Recorrido real (DuckDuckGo). Google no se pudo verificar: bloqueó la búsqueda automática.',
+   'La persona busca su consultorio, no "Telesalud". Nada vincula el nombre del CESFAM con el canal oficial.',
+   'Termina en un canal que no agenda en el sistema público, pierde tiempo o entrega datos a un tercero.',
+   'Alta',['Contenido','Externo'],'od','En Google: hipótesis'],
+  ['U02','0. Buscar el CESFAM','Ambas','El buscador promete "menos de 24 horas"',
+   'La descripción que muestra el buscador dice: "Un profesional de salud prioriza tu solicitud según tu necesidad clínica y responde habitualmente en menos de 24 horas". La portada misma dice que el equipo "determinará el tiempo… según las condiciones de caso".',
+   'Etiqueta meta description del sitio (medida). Plazos de otras fuentes en la tabla de plazos.',
+   'Contradice el promedio 2021–2024 (8–11 días), las 72 h de SSMC y los 20 días hábiles de un CESFAM.',
+   'Expectativa falsa, desconfianza, nuevas solicitudes por impaciencia. La duplicación es la principal causa del 6,4% de cierres administrativos.',
+   'Alta',['Contenido'],'hv',''],
+  ['U03','1. Portada','Celular','El botón principal queda bajo un bloque vacío',
+   'En el celular, la primera pantalla muestra un bloque verde vacío de unos 330 px. "Envía tu Solicitud de Atención" aparece a unos 600 px de 844, y el pie de página fijo tapa el fondo.',
+   'A01 (medido a 390×844).',
+   'La acción más importante no se ve de inmediato; la pantalla parece vacía o sin cargar.',
+   'Más scroll y duda sobre si la página funciona, sobre todo con conexión lenta.',
+   'Media',['UI'],'hv',''],
+  ['U04','1. Portada','Ambas','Tres de los cuatro botones no dicen lo que hacen',
+   '"Gestiona tus Solicitudes" abre un menú con Anular y Consultar. "Sigue estos pasos" es el tutorial. "Para editar tus datos debes iniciar sesión" es el acceso y parece un aviso.',
+   'A01 y A11; menú verificado.',
+   'Las etiquetas describen el sistema, no la necesidad ("¿cómo va mi solicitud?", "¿cómo funciona?").',
+   'La persona no encuentra el seguimiento ni el inicio de sesión.',
+   'Media',['UX','Contenido'],'hv',''],
+  ['U05','2. Iniciar sesión','Ambas','No se comunica que iniciar sesión ahorra trabajo',
+   'El beneficio no aparece en el botón ni en la pantalla de acceso ("Puede iniciar sesión con su clave única."). Solo aparece en la quinta línea del aviso rosado ("Puedes inicar sesión en la esquina superior derecha, para facilitar el proceso"), con error de tipeo y apuntando a un ícono sin texto.',
+   'A02, A06; observación del autor después de enviar su solicitud.',
+   'El incentivo existe pero está escondido; el ícono de cuenta no tiene nombre accesible.',
+   'La persona llena a mano todo lo que el Estado ya sabe. Queda por verificar qué se rellena realmente.',
+   'Alta',['UX','Contenido'],'hv','Que ahorre tiempo: hipótesis'],
+  ['U06','2. Iniciar sesión','Ambas','Dos sistemas de acceso distintos',
+   'Se ofrece ClaveÚnica y también "usuario y contraseña" propio de Telesalud (tipo de documento, número y contraseña).',
+   'A06.',
+   'Una segunda contraseña que recordar, sin explicar cuál conviene.',
+   'Confusión y olvidos de contraseña; más consultas al CESFAM.',
+   'Baja',['UX'],'hv',''],
+  ['U07','3. Aviso antes del formulario','Ambas','El aviso de emergencia es el texto menos legible',
+   'Un bloque rosado mezcla cinco mensajes: emergencia (131), Salud Responde, inscripción, inicio de sesión y tutorial. El texto de emergencia mide 12 px, con contraste de 4,21:1 (bajo el mínimo AA de 4,5:1). Los números no son enlaces para llamar.',
+   'A02; contraste y enlaces medidos.',
+   'La información más crítica compite con avisos administrativos; texto centrado y chico; no se puede tocar para llamar.',
+   'Una persona en emergencia, o con baja visión, no la ve o no puede llamar rápido. Con el zoom bloqueado (U08) no puede agrandarla.',
+   'Crítica',['Accesibilidad','Contenido','UI'],'hv',''],
+  ['U08','Transversal','Celular','El zoom con los dedos está bloqueado',
+   'La etiqueta viewport dice "maximum-scale=1, minimum-scale=1, user-scalable=no".',
+   'HTML del sitio (medido).',
+   'Incumple WCAG 1.4.4 (cambiar el tamaño del texto). Chrome en Android respeta el bloqueo por defecto; Safari en iOS lo ignora (inferencia sobre navegadores, por verificar en un celular real).',
+   'Personas mayores o con baja visión no pueden agrandar textos de 11–12 px ni el tutorial, que es imagen.',
+   'Crítica',['Accesibilidad'],'hv','Efecto por navegador: inferencia'],
+  ['U09','4. Datos del paciente','Celular','El celular no ayuda a escribir: sin teclados adecuados ni autocompletar',
+   'Ningún campo declara "autocomplete" ni "inputmode". Teléfonos y email son campos de texto normal.',
+   'Atributos medidos en los 25 controles.',
+   'Incumple WCAG 1.3.5 (propósito de los campos). El celular muestra el teclado de letras para números y no ofrece los datos guardados.',
+   'Más tiempo y errores de tipeo; escribir todo a mano en una pantalla pequeña.',
+   'Alta',['UI','Accesibilidad'],'hv','Teclado en un celular real: por verificar'],
+  ['U10','4. Datos del paciente','Ambas','La fecha de nacimiento no indica formato y acepta fechas imposibles',
+   'Campo de texto sin ejemplo ni formato; el calendario está en un ícono aparte. Aceptó "31-02-1950" sin marcar error al salir del campo.',
+   'Prueba con dato falso (medida).',
+   'La persona no sabe si escribir 05/03/1950, 5-3-50 u otra cosa. No sabemos si el servidor rechaza la fecha al enviar.',
+   'Errores de formato. Llegar a 1950 en un calendario puede requerir muchos toques (inferencia).',
+   'Media',['UI','UX'],'hv',''],
+  ['U11','4–7. Validaciones','Ambas','Los errores se muestran solo con color y sin explicación',
+   'Un campo obligatorio vacío se pone rojo sin mensaje. El email "abc" y el teléfono "12" también se ponen rojos sin mensaje. Solo el RUN con letras dice "Debe ingresar un RUN válido". Ningún campo usa aria-invalid, y "obligatorio" es solo un asterisco en la etiqueta.',
+   'A05; atributos medidos.',
+   'Incumple WCAG 1.4.1 (uso del color) y 3.3.1 / 3.3.2 (identificar errores, etiquetas o instrucciones). Un lector de pantalla no anuncia el error.',
+   'La persona no sabe qué corregir; personas daltónicas no distinguen el rojo; abandono.',
+   'Alta',['Accesibilidad','UX'],'hv',''],
+  ['U12','5. Dirección y establecimiento','Ambas','Región y comuna se piden dos veces',
+   'Se piden en la dirección del paciente y otra vez en la del establecimiento, sin opción de copiar.',
+   'A03; recorrido real.',
+   'Trabajo repetido; el segundo par existe solo para filtrar la lista de establecimientos.',
+   'Más toques y más posibilidad de inconsistencias.',
+   'Media',['UX'],'hv',''],
+  ['U13','5. Dirección y establecimiento','Celular','La lista de comunas exige scroll dentro de una caja',
+   'Las 52 comunas de la Región Metropolitana están en un menú de 464 px que muestra 9 a la vez y tapa la cabecera. Se puede escribir para filtrar ("san b" → San Bernardo), pero nada lo indica. Las regiones empiezan con "De" ("De Tarapacá") y siguen el orden por número, con Arica y Ñuble al final.',
+   'A04; medido.',
+   'El scroll anidado es difícil con los dedos o con temblor; filtrar escribiendo no es evidente; el orden de las regiones no es alfabético ni geográfico.',
+   'Tiempo y frustración, en especial para personas mayores.',
+   'Media',['UI'],'hv',''],
+  ['U14','5. Establecimiento','Ambas','Hay que saber en qué centro se está inscrito',
+   'Se elige entre 11 establecimientos en San Bernardo (7 CESFAM y 4 CECOSF), con nombres como "Raúl Cuevas (Ex-San Bernardo)". El texto de ayuda dice: "en caso de no estar inscrito en un centro, ingrese comuna de residencia".',
+   'A04; recorrido real.',
+   'Es un dato que el sistema de inscripción ya conoce (inferencia); los nombres cambiaron con el tiempo.',
+   'Solicitud al centro equivocado. Los usuarios no inscritos son, junto con los duplicados, la principal causa de cierre administrativo.',
+   'Alta',['Administrativo','UX'],'od',''],
+  ['U15','6. Contacto','Celular','Teléfonos apretados y botones de opción diminutos',
+   'Los dos teléfonos van lado a lado, cada uno de 103 px de ancho, con etiquetas cortadas ("Teléfono de contac…"). Los botones Celular/Fijo miden 21 px de alto.',
+   'A03; medido.',
+   'Por debajo de 24 px (WCAG 2.2, 2.5.8) y del mínimo recomendado de 44 px. La etiqueta cortada no dice cuál es obligatorio.',
+   'Toques equivocados; ingresar el número en el campo o tipo incorrecto.',
+   'Media',['UI','Accesibilidad'],'hv',''],
+  ['U16','6. Contacto','Ambas','No se avisa que hay que contestar la llamada',
+   'Nada indica desde qué número llamarán ni qué pasa si no se contesta. En un CESFAM la solicitud "será anulada" tras tres intentos sin respuesta, y llaman desde un número 800.',
+   'Preguntas frecuentes de Ancora UC (hecho verificado); el formulario no lo menciona (observación).',
+   'Mucha gente no contesta números desconocidos (inferencia).',
+   'La solicitud se anula sin que la persona entienda por qué; tiene que empezar de nuevo.',
+   'Alta',['Contenido','Administrativo'],'hv','Práctica en otros CESFAM: hipótesis'],
+  ['U17','7. Categorías','Ambas','El paciente debe traducir su necesidad al idioma interno',
+   'Hay que elegir entre 12 prestadores y 63 motivos, con solapes (Control Crónico en 4 prestadores), vacíos (farmacia, "no sé", pedir por otra persona) y jerga ("Chile Crece Contigo", "Díada", "MADIS").',
+   'Recorrido real; catálogo completo observado.',
+   'Pide conocer cómo se organiza el CESFAM; no hay "no sé" ni ayuda contextual.',
+   'Duda, categoría al azar o abandono. El triagista puede corregir, así que el efecto en la atención está por validar.',
+   'Alta',['Contenido','Administrativo','UX'],'hv','Efecto en la atención: hipótesis'],
+  ['U18','7. Categorías','Ambas','La especificidad repite el motivo',
+   'En la mayoría de los motivos, la única especificidad es igual al motivo. Dental pide un rango de edad que ya sale de la fecha de nacimiento.',
+   'Catálogo observado.',
+   'Un paso obligatorio que no aporta información.',
+   'Más toques, más carga mental.',
+   'Baja',['UX','Administrativo'],'hv',''],
+  ['U19','8. Texto libre','Ambas','El texto es obligatorio, pero la ayuda dice "le sugerimos"',
+   '"Información Adicional *" es obligatoria, con un máximo de 300 caracteres. La ayuda dice "le sugerimos completar el campo de información adicional". No da ejemplos de qué escribir.',
+   'A03; medido.',
+   'Instrucción contradictoria y sin guía para quien no sabe redactar.',
+   'Textos pobres o error al enviar. Cuánto importa el texto para el triage está por validar.',
+   'Media',['Contenido'],'hv',''],
+  ['U20','4. Datos del paciente','Ambas','No se explica por qué se piden edad y discapacidad',
+   'La fecha de nacimiento y la casilla de discapacidad se piden sin explicación. Según las Orientaciones SSMS, la prioridad alta incluye a personas mayores de 60 años y en situación de discapacidad.',
+   'Orientaciones SSMS (hecho verificado); formulario (observación).',
+   'La persona no sabe que declarar su discapacidad puede ayudarla (inferencia).',
+   'Omite la casilla por pudor o por no entenderla; la prioridad podría quedar mal asignada.',
+   'Media',['Contenido'],'inf','Uso en cada CESFAM: hipótesis'],
+  ['U21','9. Enviar','Ambas','El botón Enviar tiene bajo contraste',
+   'ENVIAR: blanco sobre verde, contraste 3,0:1, texto de 14 px y 36 px de alto, al final de un formulario de unos 2.900 px en el celular.',
+   'A03; medido.',
+   'Incumple WCAG 1.4.3 (mínimo 4,5:1 para texto normal).',
+   'Difícil de ver para personas con baja visión.',
+   'Media',['Accesibilidad','UI'],'hv',''],
+  ['U22','10. Confirmación','Ambas','La confirmación no guía el paso siguiente',
+   'Aparecen un aviso breve y una ventana de éxito (confirmación duplicada), un código de 10 caracteres, el horario de lunes a viernes de 8 a 17 y "no acudir presencialmente". El único botón es "OK", sin "Ver estado". Detrás, el formulario queda lleno con ENVIAR disponible.',
+   'Recorrido real.',
+   'Queda claro que se envió, pero no qué hacer. El formulario lleno invita a reenviar.',
+   'Posible solicitud duplicada (por verificar); código perdido si no lo anota.',
+   'Alta',['UX'],'od','Riesgo de duplicado: hipótesis'],
+  ['U23','11. Qué pasará después','Ambas','Las expectativas no calzan con lo que ocurre',
+   'El tutorial dice "Agendaremos tu cita", pero el 28,4% se resuelve a distancia. No se dice quién llamará, desde qué número, en qué plazo realista ni qué hacer si los síntomas empeoran mientras espera.',
+   'A07, recorrido real; datos RPSP 2025.',
+   'Falta la información que más angustia: cuándo y cómo me contactan.',
+   'Ansiedad, llamadas o visitas al CESFAM, solicitudes repetidas.',
+   'Alta',['Contenido'],'hv',''],
+  ['U24','12. Consultar estado','Ambas','Consultar exige código + apellido, con un error genérico',
+   'Pide "Código de seguimiento" y "Apellido del Paciente". El código lo guarda la persona o llega por correo. Si no coincide: "No se ha encontrado una solicitud con los datos proporcionados." No dice qué revisar ni dónde encontrar el código.',
+   'A08; prueba con código falso.',
+   'Dos datos que recordar; el error no ayuda a recuperarse.',
+   'Quien perdió el código no puede consultar y llama o va al CESFAM.',
+   'Media',['UX','Contenido'],'hv',''],
+  ['U25','12. Consultar estado','Ambas','Los estados no explican qué significan',
+   'Los estados son "Solicitud ingresada → Solicitud en revisión → Solicitud finalizada". Un CESFAM explica que "en revisión" significa que "le contactaremos pronto", pero el sitio no lo dice. No sabemos qué muestra "finalizada".',
+   'Estado observado en una solicitud real; Ancora UC.',
+   '"Finalizada" puede significar hora agendada, resuelta a distancia o anulada.',
+   'La persona no sabe si tiene hora o si debe hacer algo.',
+   'Media',['Contenido'],'od','Contenido de "finalizada": hipótesis'],
+  ['U26','Tutorial','Ambas','El tutorial es solo imágenes y explica el software, no la necesidad',
+   'Son 6 imágenes con texto dentro, todas con texto alternativo vacío. No enlaza al video de YouTube que menciona el aviso rosado. Explica cómo usar el formulario, no qué prestador elegir ni qué pasará. En escritorio, la barra superior tapa los números de paso.',
+   'A07, recorrido real; atributos alt medidos.',
+   'Incumple WCAG 1.1.1 (contenido no textual): un lector de pantalla no lee nada. No se puede agrandar (U08) ni traducir.',
+   'Quien más necesita ayuda (baja visión, baja alfabetización digital) no la recibe.',
+   'Alta',['Accesibilidad','Contenido'],'hv',''],
+  ['U27','Transversal','Ambas','La estructura es invisible para tecnologías de apoyo',
+   'Ninguna página medida tiene encabezados (h1–h6). Las imágenes no tienen alt. Los íconos se leen como texto ("account_circle", "bookmark_border"). No hay enlace para "saltar al contenido".',
+   'Medido en inicio, formulario, tutorial y consultar.',
+   'Incumple WCAG 1.3.1, 2.4.1, 1.1.1 y 4.1.2.',
+   'Un lector de pantalla anuncia palabras sin sentido y no permite navegar por secciones.',
+   'Alta',['Accesibilidad'],'hv','Escucha con lector de pantalla: por verificar'],
+  ['U28','Transversal','Ambas','Los errores técnicos se muestran en inglés y sin explicación',
+   'Con una falla de red simulada al cargar el formulario apareció "Atención: Cannot read properties of undefined (reading \'status\')" con un botón OK.',
+   'A09; falla de red simulada.',
+   'Un error de programación llega a la persona, en inglés, sin qué hacer.',
+   'Con mala señal móvil, la persona no puede seguir ni entiende qué pasó. Cuán frecuente es en la realidad está por validar.',
+   'Alta',['Técnico','UX'],'hv','Frecuencia real: hipótesis'],
+  ['U29','Transversal','Celular','El pie de página fijo ocupa pantalla con créditos',
+   'Pie fijo de 54 px en todas las vistas del celular, con créditos de OPS y licencia. Los enlaces miden 9 px, con contraste de 3,94:1.',
+   'A01–A08; medido.',
+   'Ocupa cerca del 6% de la pantalla con información que el paciente no necesita; texto ilegible.',
+   'Menos espacio útil; puede tapar contenido.',
+   'Baja',['UI','Accesibilidad'],'hv',''],
+  ['U30','Transversal','Ambas','Los subtítulos tienen bajo contraste',
+   'Los subtítulos de las tarjetas ("Datos de la persona que solicita atención", "Para la contactabilidad desde su CESFAM") miden 12 px con contraste de 4,21 a 4,59:1, y los textos de ayuda miden 11 px.',
+   'Medido.',
+   'Al límite o bajo AA, en letra pequeña.',
+   'Difícil de leer para personas mayores.',
+   'Baja',['Accesibilidad','UI'],'hv',''],
+  ['U31','3. Aviso antes del formulario','Ambas','Quien no está inscrito no sabe cómo inscribirse',
+   'El aviso dice "Si usted no se encuentra inscrito en un CESFAM, recomendamos hacerlo a la brevedad", sin enlace ni pasos.',
+   'A02.',
+   'Es un requisito para usar Telesalud, sin camino para cumplirlo.',
+   'La solicitud se cierra por trámite administrativo; la persona no sabe por qué.',
+   'Media',['Contenido','Administrativo'],'hv',''],
+  ['U32','Transversal','Ambas','No se ofrecen alternativas al formulario web',
+   'El sitio no menciona la vía telefónica ni la asistencia de un tercero, que sí contemplan los Lineamientos y la norma técnica 237. No encontramos app ni WhatsApp.',
+   'Sitio (observación); Lineamientos y norma técnica 237 (hecho verificado).',
+   'Quien no puede usar la web no sabe que existen otras vías.',
+   'Exclusión de personas mayores y con baja alfabetización digital, o filas presenciales.',
+   'Media',['Administrativo','Contenido'],'od',''],
+  ['U33','Transversal','Ambas','Lenguaje formal y trato mezclado',
+   'Se usan "Estimado(a) Usuario(a)", "Tipo Prestador", "Especificidad Consulta" e "Información Adicional". Se mezcla "usted" ("Si usted posee") con "tú" ("Puedes iniciar").',
+   'A02, A03.',
+   'Vocabulario de sistema, no de persona; el tono inconsistente resta confianza.',
+   'Carga cognitiva mayor para personas con baja alfabetización.',
+   'Media',['Contenido'],'od',''],
+  ['U34','Transversal','Ambas','Nada dice cuánto falta',
+   'Son 5 secciones en una sola página larga (unos 2.900 px en el celular), sin indicador de avance ni resumen antes de enviar.',
+   'A02, A03.',
+   'La persona no sabe cuánto le falta ni puede revisar todo antes de enviar.',
+   'Abandono a mitad del formulario (inferencia).',
+   'Media',['UX'],'hv',''],
+  ['U35','Transversal','Ambas','No hay forma de pedir para otra persona',
+   'El formulario asume que quien escribe es el paciente. Solo existe la casilla "cuidador/a de una persona con discapacidad".',
+   'A02; recorrido real.',
+   'Es común que hijos o nietos hagan el trámite por una persona mayor (inferencia).',
+   'Confusión sobre qué datos poner (los del paciente o los de quien escribe) y sobre a quién llamarán.',
+   'Media',['UX','Administrativo'],'od','Frecuencia: hipótesis']
+  ];
+  var sevOrder={'Crítica':0,'Alta':1,'Media':2,'Baja':3};
+  var etapas=[]; F.forEach(function(f){if(etapas.indexOf(f[1])<0)etapas.push(f[1])});
+  var fe=document.getElementById('f-etapa'); etapas.forEach(function(e){var o=document.createElement('option');o.textContent=e;fe.appendChild(o)});
+  var counts={'Crítica':0,'Alta':0,'Media':0,'Baja':0}; F.forEach(function(f){counts[f[8]]++});
+  document.getElementById('sevstats').innerHTML=Object.keys(counts).map(function(k){return '<div class="stat'+(k==='Crítica'||k==='Alta'?' bad':'')+'"><b>'+counts[k]+'</b><span>hallazgos de severidad '+k.toLowerCase()+'</span></div>'}).join('');
+  function renderF(){
+    var s=document.getElementById('f-sev').value, ty=document.getElementById('f-tipo').value, et=fe.value, ce=document.getElementById('f-cert').value;
+    var list=F.filter(function(f){return (!s||f[8]===s)&&(!ty||f[9].indexOf(ty)>=0)&&(!et||f[1]===et)&&(!ce||f[10]===ce)})
+      .sort(function(a,b){return sevOrder[a[8]]-sevOrder[b[8]]||a[0].localeCompare(b[0])});
+    document.getElementById('f-count').textContent=list.length+' de '+F.length+' hallazgos';
+    document.getElementById('findings').innerHTML=list.map(function(f){
+      var c=CERT[f[10]];
+      return '<article class="finding" id="'+f[0]+'"><div class="fh"><span class="fid">'+f[0]+'</span><span class="sev s-'+f[8]+'">'+f[8]+'</span><b>'+esc(f[3])+'</b></div>'+
+        '<div class="fh"><span class="pill">'+esc(f[1])+'</span><span class="pill">'+esc(f[2])+'</span>'+f[9].map(function(x){return '<span class="pill">'+x+'</span>'}).join('')+
+        '<span class="tag '+c[0]+'">'+c[1]+'</span>'+(f[11]?'<span class="small muted">('+esc(f[11])+')</span>':'')+'</div>'+
+        '<dl><dt>Qué ocurre</dt><dd>'+esc(f[4])+'</dd><dt>Evidencia</dt><dd>'+esc(f[5])+'</dd><dt>Por qué es un problema</dt><dd>'+esc(f[6])+'</dd><dt>Consecuencia para el paciente</dt><dd>'+esc(f[7])+'</dd></dl></article>';
+    }).join('');
+  }
+  ['f-sev','f-tipo','f-etapa','f-cert'].forEach(function(id){document.getElementById(id).addEventListener('change',renderF)});
+  renderF();
+
+  /* ---------- catalog ---------- */
+  var CAT=[
+   ['Asistente Social',['Certificado','Consulta Social']],
+   ['Dental',['Consulta de Atención Odontológica','Control Preventivo Odontológico','Consulta de Tratamiento Odontológico','Control embarazadas','Control Dental Diabetes']],
+   ['Enfermería',['Control de Salud Infantil','Sospecha de pie diabético','Control de Salud del Adolescente (10-19 años)','Reevaluación del Desarrollo Psicomotor','Control adulto mayor (mayor a 65 años)','Consulta de Enfermería','Control Crónico']],
+   ['Kinesiología',['Control crónico adulto','Control crónico infanto juvenil','Problema respiratorio descompensado','Atención rehabilitación física','Entrega de ayudas técnicas']],
+   ['Matrona',['Control de la Díada','Control ginecológico (incluye PAP o VPH)','Método anticonceptivo','Revisión de exámenes con matrona','Control de Salud del Adolescente (10-19 años)','Consulta de lactancia','Consulta Ginecológica','Control prenatal','Renovación de receta con Matrona','Solicitud de preservativos (condones)','Control preconcepcional','Exámenes','Sospecha de Embarazo','Ingreso de Embarazo']],
+   ['Medicina',['Atención Medicina General','Resultado de exámenes','Control de salud infantil','Renovación de receta','Estado de Interconsulta','Control Crónico','Certificado o Informe médico']],
+   ['Nutrición',['Control embarazadas','Control de salud infantil (5 meses a 3 años 6 meses)','Control Crónico','Clínica de Lactancia','Sobrepeso y obesidad','Bajopeso']],
+   ['Podología',['Podología preventiva pie diabético']],
+   ['Profesionales Chile Crece Contigo',['Taller prenatal','Taller de promoción temprana del desarrollo motor','Taller de promoción temprana del lenguaje','Taller parental "Nadie Es Perfecto"','Ingreso Sala de Estimulación (MADIS)','Sesión de intervención MADIS']],
+   ['Psicología',['Consulta','Control salud mental','Certificado o Informe médico']],
+   ['Técnico en enfermería',['Examen de medicina preventiva del adulto','Curaciones y/o extracciones de puntos']],
+   ['Terapia Ocupacional',['Evaluación de discapacidad','Problemas de memoria','Atención rehabilitación física','Consumo de drogas y alcohol','Entrega de ayudas técnicas']]
+  ];
+  document.getElementById('taxbody').innerHTML=CAT.map(function(c){return '<tr><td>'+esc(c[0])+'</td><td class="num">'+c[1].length+'</td><td>'+esc(c[1].join(' · '))+'</td></tr>'}).join('');
+})();
+</script>
+</body>
+</html>
